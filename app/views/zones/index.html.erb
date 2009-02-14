@@ -1,0 +1,152 @@
+<h1>Listing zones</h1>
+<%
+   @grid_w = 20   # the width of each grid
+   @mygrid_color = "3333ff"
+   @othergrid_color = "ff33ff"
+   @expandgrid_color = "ffff55"
+
+   #------------------------ Xin
+   def get_color_hex(user_id)
+     # return a color string determined by the current user_id
+     if not user_id
+       "ffffff"
+     else
+       colorstr = (user_id % 5 * 25 + 128).to_s(16)
+       colorstr = colorstr + (user_id % 100 + 128).to_s(16)
+       colorstr = colorstr + (user_id % 2 * 127 + 128).to_s(16)
+       colorstr
+     end
+   end
+%>
+
+<!---Added by Xin: grid view comments--->
+<table cellpadding="0" cellspacing="0" border="0">
+  <tr height="<%= @grid_w %>">
+    <% if @user %>
+      <td width="<%= @grid_w*1.5 %>">
+        <table bgcolor="#<%= get_color_hex(@user.id) %>" width="<%= @grid_w %>" height="<%= @grid_w %>"></table>
+      </td>
+      <td width="150"><%= @user.name %> (yourself)</td>
+    <% end %>
+    <% if @user %>
+      <td width="<%= @grid_w*1.5 %>"><img src="/images/flag.gif" width="<%= @grid_w %>" height="<%= @grid_w %>"></td>
+      <td width="150">Current position</td>
+      <td width="<%= @grid_w*1.5 %>">
+        <img src="/images/no_zone.gif" width="<%= @grid_w %>" height="<%= @grid_w %>">
+      </td>
+      <td width="150">Expandable Area</td>
+    <% end %>
+  </tr>
+</table>
+<br>
+
+
+<br>
+<table width=100%>
+  <tr>
+    <td width=850>
+      <!---Added by Xin: grid view of the world--->
+      <table cellpadding="0" cellspacing="0" border="0" background="/images/sbmap.jpg">
+        <tr height="1" bgcolor="#aaaaaa">
+          <td colspan="<%= (@x_max - @x_min + 1)*2 + 1 %>"></td>
+        </tr>
+        <% for @y in (@y_min..@y_max) %>
+          <tr height="<%= @grid_w %>">
+            <td width="1" bgcolor="#aaaaaa"></td>
+            <% for @x in (@x_min..@x_max)
+              @current_zone = @zones[@x - @x_min][@y - @y_min]
+              @mygrid = false
+              @expandable = false
+              @enemy = false
+              if @current_zone
+                if @current_zone.user_id == @user.id   #myself
+                  @bg_str = get_color_hex(@current_zone.user_id) #@mygrid_color
+                  @mygrid = true
+                else
+                  if @current_zone.user_id == -1   #expandable cells
+                    @bg_str = ""
+                    @expandable = true
+                  else
+                    @bg_str = get_color_hex(@current_zone.user_id)  #@othergrid_color     #other peoples
+                    @enemy = true
+                  end
+                end
+              else
+                @bg_str = ""
+              end
+              if @bg_str != ""
+                @bg = "bgcolor='#" + @bg_str + "'"
+              else   #not occupied
+                @bg = ""
+              end
+            %>
+              <td width="<%= @grid_w %>" <%= @bg %>>
+                <% if @user and @x == @user.viewport_x.to_i and @y == @user.viewport_y.to_i %>
+                  <!---Added by Xin: if it is the position of the user, draw a flag--->
+                  <img src="/images/flag.gif" width="<%= @grid_w %>" height="<%= @grid_w %>">
+                <% else
+                  if @expandable %>
+                    <%= link_to image_tag("/images/no_zone.gif", :border => 0, :width => @grid_w, :height => @grid_w),
+                        :controller => 'users', :action => 'expand_territory', :x => @x, :y => @y %>
+                  <% else
+                    if @enemy   #enemies
+                      @enemystr = "other user's zone"
+                  %>
+                      <%= link_to image_tag("/images/empty.gif", :alt => @enemystr, :border => 0, :width => @grid_w, :height => @grid_w),
+                          :controller => 'users', :action => 'attack', :zone => @zones[@x - @x_min][@y - @y_min].id %>
+                    <% end
+                       end
+                       end %>
+              </td>
+
+              <% if @x < @x_max and @current_zone and @zones[@x - @x_min + 1][@y - @y_min] \
+              and @current_zone.user_id == @zones[@x - @x_min + 1][@y - @y_min].user_id \
+              and @current_zone.user_id != -1 %>
+                <td width="1" <%= @bg %>></td>
+              <% else %>
+                <td width="1" bgcolor="#aaaaaa"></td>
+              <% end %>
+
+            <% end #for x  %>
+          </tr>
+
+          <tr height="1" bgcolor="#aaaaaa">
+            <td width="1" bgcolor="#aaaaaa"></td>
+            <% for @x in (@x_min..@x_max) %>
+              <% if @y < @y_max and @zones[@x - @x_min][@y - @y_min] and @zones[@x - @x_min][@y - @y_min + 1] \
+         and @zones[@x - @x_min][@y - @y_min].user_id == @zones[@x - @x_min][@y - @y_min + 1].user_id \
+        and @zones[@x - @x_min][@y - @y_min].user_id != -1 %>
+                <td width="<%= @grid_w + 1 %>" colspan="2" bgcolor="#<%= get_color_hex(@zones[@x - @x_min][@y - @y_min].user_id) %>"></td>
+              <% else %>
+                <td width="<%= @grid_w + 1 %>" colspan="2" bgcolor="#aaaaaa"></td>
+              <% end
+                 end %>
+            <td width="1" bgcolor="#aaaaaa"></td>
+          </tr>
+        <% end #for y  %>
+      </table>
+    </td>
+    <td>
+      <!--- other users in this area --->
+      <table cellpadding="0" cellspacing="0" border="0">
+        <% for other_user in @users_in_area
+          if other_user.id != @user.id %>
+            <tr height="<%= @grid_w %>">
+              <td width="<%= @grid_w*1.5 %>">
+                <table bgcolor="#<%= get_color_hex(other_user.id) %>" width="<%= @grid_w %>" height="<%= @grid_w %>"></table>
+              </td>
+              <td width="150"><%= other_user.name %></td>
+            </tr>
+            <tr height="8"></tr>
+          <% end
+             end %>
+      </table>
+    </td>
+  </tr>
+</table>
+
+
+<br/>
+
+
+<%= link_to 'New zone', new_zone_path %>

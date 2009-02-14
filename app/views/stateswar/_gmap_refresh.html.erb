@@ -1,0 +1,7 @@
+<p style="color: RED"><%= flash[:notice] %></p>
+<br>
+refresh time: <br><%= Time.now %>
+<script type="text/javascript">
+   //alert("refresh game state");
+  window.setTimeout(refreshGmapState, 0);
+</script>

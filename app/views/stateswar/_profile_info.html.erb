@@ -1,0 +1,23 @@
+<table width=100% id=profile_info >
+  <tr>
+    <td>USERNAME</td>
+    <td><%= h session[:user_name] %></td>
+  </tr>
+  <tr>
+    <td>TURNS</td>
+    <td><%= h session[:turns] %></td>
+  </tr>
+  <tr>
+    <td>SOLDIERS</td>
+    <td><%= h session[:soldiers] %></td>
+  </tr>
+  <tr>
+    <td>Alliance</td>
+    <td><%=h @team %></td>
+  </tr>
+  <tr>
+    <td>ZONES</td>
+    <td><%= h session[:zones] %></td>
+  </tr>
+  <!--<tr><td><p style="color: RED"><%= flash[:notice] %></p></td></tr>-->
+</table>

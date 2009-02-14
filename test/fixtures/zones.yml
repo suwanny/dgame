@@ -1,0 +1,80 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+zone_dave_a:
+  x: 4
+  y: 1
+  user_id: 1
+  soldiers: 5
+
+zone_dave_b:
+  x: 5
+  y: 1
+  user_id: 1
+  soldiers: 5
+
+zone_dave_c:
+  x: 5
+  y: 2
+  user_id: 1
+  soldiers: 5
+
+zone_bob_a:
+  x: 6
+  y: 4
+  user_id: 2
+  soldiers: 5
+
+zone_carol_a:
+  x: 3
+  y: 3
+  user_id: 3
+  soldiers: 5
+
+zone_carol_b:
+  x: 4
+  y: 3
+  user_id: 3
+  soldiers: 5
+
+zone_allen_a:
+  x: 2
+  y: 3
+  user_id: 4
+  soldiers: 5
+
+zone_allen_b:
+  x: 2
+  y: 4
+  user_id: 4
+  soldiers: 5
+
+zone_dan_one:
+  x: 3
+  y: 1
+  user_id: 5
+  soldiers: 5
+
+zone_dan_two:
+  x: 3
+  y: 2
+  user_id: 5
+  soldiers: 5
+
+zone_dan_three:
+  x: 4
+  y: 2
+  user_id: 5
+  soldiers: 1
+
+bob_zone:
+  x: 5
+  y: 5
+  user_id: 2
+  soldiers: 1
+
+zone_15_15:
+  x: 15
+  y: 15
+  user_id: 1
+  soldiers: 1
+

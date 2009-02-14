@@ -1,0 +1,51 @@
+<% SALT = "NaCl" unless defined?(SALT) %>
+
+dave:
+  id: 1
+  name: dave
+  hashed_password: <%= User.encrypted_password('secret', SALT) %>
+  salt: <%= SALT %>
+  email: dave@dave.com
+  turns: 1
+  total_soldiers: 15
+  total_zones: 4
+
+bob:
+  id: 2
+  name: bob
+  hashed_password: <%= User.encrypted_password('secret', SALT) %>
+  salt: <%= SALT %>
+  email: bob@bob.com
+  turns: 100
+  total_soldiers: 5
+  total_zones: 1
+
+carol:
+  id: 3
+  name: carol
+  hashed_password: <%= User.encrypted_password('secret', SALT) %>
+  salt: <%= SALT %>
+  email: carol@carol.com
+  turns: 1
+  total_soldiers: 10
+  total_zones: 2
+
+attacker:
+  id: 4
+  name: allen
+  hashed_password: <%= User.encrypted_password('secret', SALT) %>
+  salt: <%= SALT %>
+  email: allen@allen.com
+  turns: 100
+  total_soldiers: 10
+  total_zones: 2
+
+defender:
+  id: 5
+  name: dan
+  hashed_password: <%= User.encrypted_password('secret', SALT) %>
+  salt: <%= SALT %>
+  email: dan@dan.com
+  turns: 1
+  total_soldiers: 15
+  total_zones: 3

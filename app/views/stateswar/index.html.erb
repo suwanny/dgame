@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+  <title>Google Maps JavaScript API Example</title>
+
+  <LINK href="/gmap/gmap.css" rel="stylesheet" type="text/css">
+  <!--<%= javascript_include_tag "prototype" %>-->
+  <%= javascript_include_tag :defaults %>
+
+  <script type="text/javascript"
+          src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAA-BB-6Ge0PhixplqNBDmPrRSwua_wo_pIsC5N7-F2rBVINzpyBRTm_yhgsmXG8Rz-moMLzTyvx8vIWQ"></script>
+  <script src="/gmap/markermanager.js"></script>
+  <script src="/gmap/states.js" type="text/javascript"></script>
+
+  <script type="text/javascript">
+    var username = "<%= h session[:user_name] %>";
+    var alliance = "<%= h session[:alliance] %>";
+    var check_refresh = true;
+  </script>
+
+  <script src="/gmap/gmap.js" type="text/javascript"></script>
+  <script src="/gmap/gobject.js" type="text/javascript"></script>
+
+  <script type="text/javascript">
+    <!--
+    <% if @states %>
+      <% for state in @states %>
+        paint_region('<%= h state.state_name %>', <%= h state.alliance %> );
+      <% end %>
+    <% end %>
+     -->
+  </script>
+
+  <script type="text/javascript">
+    <!--
+    function expand(state) {
+      //alert("expand State: " + state);
+      var myState = document.getElementById('selectedState');
+      myState.value = state;
+      <%= remote_function(:update => "gmap_contller",
+          :url => { :action => :expand_region, :user => session[:user_name] },
+          :with => "'state_name=' + $('selectedState').value" ) %>
+    }
+
+    function refreshMyStates() {
+      <%= remote_function(:update => "alliance_states",
+        :complete => visual_effect(:highlight, "alliance_states", :duration => 1),
+        :url => { :action => :refresh_my_states, :user => session[:user_name] }) %>
+    }
+
+    function refreshProfileInfo() {
+      <%= remote_function :update => "userProfile",
+        :complete => visual_effect(:highlight, "userProfile", :duration => 0.5),
+        :url => { :action => "refresh_profile_info"} %>
+    }
+
+    function refreshGmapState() {
+      <%= remote_function(:update => "gmap_contller",
+        :url => { :action => :refresh_gmap_view, :user => session[:user_name] }) %>
+    }
+
+    function confirmDelete(state) {
+        if (confirm("Really delete this ('" + state + "') ?")) {
+            return true;
+            } else {
+            return false;
+            }
+        }
+
+    function attack_region(state) {
+      var myState = document.getElementById('selectedState');
+      myState.value = state;
+      var region = dgList[state];
+
+      // Is this my state?
+      if(region.alliance == alliance ) {
+      // remove region and soldiers back..
+        if(confirmDelete(state)) {
+          <%= remote_function(:update => "gmap_contller",
+              :url => { :action => :withdraw_region, :user => session[:user_name] },
+              :with => "'state_name=' + $('selectedState').value" ) %>
+        }
+      }
+      else {
+        var value = prompt("Attack How many soldiers will you pay for this Attack?", 1);
+        if(value != null) {
+          alert("you're gonna spend: " + value);
+          var numSoldiers = document.getElementById('num_of_soldiers');
+          numSoldiers.value = value;
+          <%= remote_function(:update => "gmap_contller",
+              :url => { :action => :attack_region, :user => session[:user_name] },
+              :with => "'state_name=' + $('selectedState').value + '&soldiers=' + $('num_of_soldiers').value" )
+          %>
+        }
+      }
+    }
+    -->
+  </script>
+
+  <%= periodically_call_remote(
+      :condition => "check_refresh == true",
+          :update => "refresh_game",
+          :frequency => 10,
+          #:before => visual_effect(:fade, 'refresh_game'),
+      :complete => visual_effect(:highlight, "refresh_game", :duration => 1),
+          :url => { :action => "refresh_game" })
+  %>
+
+</head>
+<body onload="onLoad()" onunload="GUnload()">
+<div style="text-align: center;">
+  <!--<div class="p-shadow"><p> Distributed Risk Game (with GoogleMap javascript API) by Soo Hwan</p></div>-->
+  <br>
+
+  <table width=100%>
+    <tr>
+      <td width=95%>
+        <div id="map" style="width:100%; height:600px; text-align: left;"></div>
+      </td>
+      <td valign=top align=left>
+        <H1>Information</H1>
+
+        <div id='userProfile'>
+          <%= render :partial=>'profile_info' %>
+        </div>
+
+        <!--Hidden Fields-->
+        <input type="hidden" id='selectedState' value="NONE"/>
+        <input type="hidden" id='num_of_soldiers' value=1/>
+
+        <!--<%= button_to_function "Greeting", "alert('Hello world!')" %>-->
+        <%= button_to_remote "           Training 1 soldier             ", :update => "userProfile",
+            :url => { :action => "train_soldiers", :soldiers => 1 } %>
+        <br>
+
+        <table width=100%>
+          <tr>
+            <td>
+              <div id="alliance_states"><%= render :partial=>'alliance_states' %></div>
+            </td>
+            <td><%= select :soldier, :num, @num_solders %></td>
+            <td>
+              <%= button_to_remote "   Add Soldiers   ",
+                  :update => 'gmap_contller',
+                  :url => { :action => 'add_soldier' },
+                  :with => "'state_name=' + $('state_state').value + '&soldiers=' + $('soldier_num').value"
+              %>
+              <!--"alert(document.getElementById('state_state').value)" %>-->
+            </td>
+          </tr>
+        </table>
+        <%= button_to_remote "   Sell Soldiers    ",
+            :update => 'userProfile',
+            :url => { :action => 'sell_soldier' },
+            :with => "'soldiers=' + $('soldier_num').value"
+        %>
+
+        <br><br>
+        <H1>Actions</H1>
+        <b>1. Expand</b><br> Click to a vacant region <br>
+        <b>2. Withdrawal</b><br> Click to my team's region<br>
+        <b>3. Attack</b><br> Click to other team's region<br>
+        <br>
+
+        <div id="gmap_contller">
+          <%= render :partial=>'action_expand' %>
+        </div>
+
+        <br><br>
+
+        <div id="refresh_game">
+          <%= render :partial=>'gmap_refresh' %>
+        </div>
+
+        <br>
+        <!--<div id="map" class="p-shadow" ></div>
+        <form action="#" onsubmit="showAddress(this.address.value); return false">
+          <p>
+            <input type="text" size="30" name="address" value="6510 El Colegio Rd, Santa Barbara, CA"/>
+            <input type="submit" size="30" value="Go!"/>
+          </p>
+        </form>
+        test button here..
+        -->
+      </td>
+    </tr>
+  </table>
+
+</div>
+</body>
+</html>

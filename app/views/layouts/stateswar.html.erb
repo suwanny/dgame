@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+  <title>States War: <%= controller.action_name %></title>
+  <%= stylesheet_link_tag 'scaffold', 'dgame' %>
+  <link rel="shortcut icon" href="/images/dg_logo.gif">
+</head>
+<body>
+
+<div id="banner">
+  <table width=95% height=50>
+    <tr>
+      <td width=70% align=center>
+
+        <span style="font-size: x-large; ">DGame (Distributed Game) - States War Game </span><br>
+        <br>
+        <span style="font-size: medium; ">CS290F Project   </span>
+
+      </td>
+      <td align=right>
+        <% if session[:user_id] %>
+          <%= link_to 'Game',    :controller => 'users', :action => "game"  %>
+          <%= link_to 'StatesWar',    :controller => 'stateswar', :action => "index"  %>
+          <%= link_to 'Gameboard',    :controller => 'zones' %>
+          <%= link_to 'Ranking',    :controller => 'users', :action => "ranking" %>
+          <%= link_to 'Profile',    :controller => 'users', :action => "info" %>
+          <%= link_to "LogOut", :controller => 'users', :action => "logout" %>
+        <% else %>
+          <%= link_to "LogIn", :controller => 'users', :action => "index" %>
+        <% end %>
+        <p style="color: RED"><%= flash[:notice] %></p>
+      </td>
+    </tr>
+  </table>
+
+</div>
+
+<%= yield %>
+
+</body>
+</html>

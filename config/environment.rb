@@ -38,7 +38,7 @@ Rails::Initializer.run do |config|
 
   # Force all environments to use the same logger level
   # (by default production uses :info, the others :debug)
-  # config.log_level = :debug
+  config.log_level = :debug
 
   # Make Time.zone default to the specified zone, and make Active Record store time values
   # in the database in UTC, and return them converted to the specified local zone.
@@ -56,13 +56,13 @@ Rails::Initializer.run do |config|
   # no regular words or you'll be exposed to dictionary attacks.
   config.action_controller.session = {
     :session_key => '_dgame_session',
-    :secret      => '9851be0d1f9085ac165ba374792b06ba18f3482b1f0f9215ade51c39ff2fc0313fd5af7cb1a89e7f708edeb8ba822c49f1d78e39f93a69660a41dc0fd642a245'
+    :secret      => '3477d8478f21a0960902a95740272442c2ba3e937e8363aa5d62bd953bef48c73b1593f09c02641b1c4526b62d2336fca9c228ca132fd78801c624d80a5baa03'
   }
 
   # Use the database for sessions instead of the cookie-based default,
   # which shouldn't be used to store highly confidential information
   # (create the session table with "rake db:sessions:create")
-  # config.action_controller.session_store = :active_record_store
+  config.action_controller.session_store = :active_record_store
 
   # Use SQL instead of Active Record's schema dumper when creating the test database.
   # This is necessary if your schema can't be completely dumped by the schema dumper,

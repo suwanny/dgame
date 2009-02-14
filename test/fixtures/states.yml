@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  state_name: MA
+  user_id: 1
+  soldiers: 1
+  alliance: 1
+
+two:
+  state_name: MyString
+  user_id: 1
+  soldiers: 1
+  alliance: 1

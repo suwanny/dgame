@@ -1,0 +1,40 @@
+<% if @user %>
+  <div>
+    <%= link_to "Click here for your page", :action => "info" %>
+    <br/>
+    <!--<%= link_to "Log out", :action => "logout" %>-->
+  </div>
+<% else %>
+
+  <div style="text-align: center;">
+
+    <table align=center background="">
+      <tr>
+        <td align=right>
+          <fieldset>
+            <legend>Log In:</legend>
+            <div>
+              <table>
+                <tr>
+                  <td align=right>
+                    <% form_tag(:action=>"login") do %>
+                      <label for="name">Username:</label>
+                      <%= text_field_tag :name, params[:name] %>
+                      <label for="password">Password:</label>
+                      <%= password_field_tag :password, params[:password] %>
+                      <%= submit_tag "Login" %>
+                    <% end %>
+                  </td>
+                  <td><%= button_to "Join", {:controller => "users", :action => "new"} %></td>
+                </tr>
+                <tr><td colspan=2><image src=/images/dgame2.jpg border=2></image></td></tr>
+              </table>
+            </div>
+          </fieldset>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+<% end %>
+

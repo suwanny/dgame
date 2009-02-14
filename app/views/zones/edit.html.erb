@@ -1,0 +1,29 @@
+<h1>Attacking zone</h1>
+
+<% form_for(@zone) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :x %><br />
+    <%= f.text_field :x %>
+  </p>
+  <p>
+    <%= f.label :y %><br />
+    <%= f.text_field :y %>
+  </p>
+  <p>
+    <%= f.label :user_id %><br />
+    <%= f.text_field :user_id, :value => @user.id  %>
+  </p>
+  <p>
+    <%= f.label :soldiers %><br />
+    <%= f.text_field :soldiers %>
+  </p>
+    <p>Your turns will become <%=@user.new_turns_after_attacking%> from <%=@user.turns%>. </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show Gameboard', @zone %> |
+<%= link_to 'Back', zones_path %>

@@ -1,0 +1,29 @@
+.p-shadow {
+  width: 90%;
+  float:left;
+  background: url(/images/shadowalpha.png) no-repeat bottom right !important;
+  background: url(/images/shadow.gif) no-repeat bottom right;
+  margin: 10px 0 0 10px !important;
+  margin: 10px 0 0 5px;
+  }
+
+.p-shadow div {
+  width:98%;
+  height:600px;
+  text-align: left;
+  background: none !important;
+  background: url(/images/shadow2.gif) no-repeat left top;
+  padding: 0 !important;
+  padding: 0 6px 6px 0;
+  }
+
+.p-shadow p {
+  text-align:center;
+  color: #777;
+  background-color: #fff;
+  font: italic 1em georgia, serif;
+  border: 1px solid #a9a9a9;
+  padding: 4px;
+  margin: -6px 6px 6px -6px !important;
+  margin: 0;
+  }

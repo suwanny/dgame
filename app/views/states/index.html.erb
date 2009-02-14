@@ -1,0 +1,26 @@
+<h1>Listing states</h1>
+
+<table>
+  <tr>
+    <th>State name</th>
+    <th>User</th>
+    <th>Soldiers</th>
+    <th>Alliance</th>
+  </tr>
+
+<% for state in @states %>
+  <tr>
+    <td><%=h state.state_name %></td>
+    <td><%=h state.user_id %></td>
+    <td><%=h state.soldiers %></td>
+    <td><%=h state.alliance %></td>
+    <td><%= link_to 'Show', state %></td>
+    <td><%= link_to 'Edit', edit_state_path(state) %></td>
+    <td><%= link_to 'Destroy', state, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New state', new_state_path %>

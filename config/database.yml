@@ -20,8 +20,8 @@ development:
   database: dgame_development
   pool: 5
   username: root
-  password: dgame77
-  socket: /var/run/mysqld/mysqld.sock
+  password: dgame
+  host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -32,8 +32,8 @@ test:
   database: dgame_test
   pool: 5
   username: root
-  password: dgame77
-  socket: /var/run/mysqld/mysqld.sock
+  password: dgame
+  host: localhost
 
 production:
   adapter: mysql
@@ -41,5 +41,5 @@ production:
   database: dgame_production
   pool: 5
   username: root
-  password: dgame77
-  socket: /var/run/mysqld/mysqld.sock
+  password: dgame
+  host: localhost

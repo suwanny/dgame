@@ -1,0 +1,28 @@
+<p style="color: RED"><%= flash[:notice] %></p>
+<script type="text/javascript">
+  <% if @states %>
+    <% for tmp_state in @states %>
+      <% if @attacked_state and @attacked_state.state_name == tmp_state.state_name %>
+        remove_region('<%= h tmp_state.state_name %>');
+      <% else %>
+		
+        paint_region('<%= h tmp_state.state_name %>', <%= h tmp_state.alliance %>, <%= h tmp_state.soldiers %> );
+        //alert('STATE: <%= h tmp_state.state_name %>');
+      <% end %>
+    <% end %>
+  <% end %>
+  
+  setTimeout(refreshMyStates, 50);
+  setTimeout(refreshProfileInfo, 100);
+
+  <% if @attacked_state %>
+    //remove_region('<%= h @attacked_state.state_name %>');
+    //alert("state:<%= h @attacked_state.state_name %>, alliance:<%= h @attacked_state.alliance %>" ); 
+    
+    paint_region('<%= h @attacked_state.state_name %>', <%= h @attacked_state.alliance %>, <%= h @attacked_state.soldiers %> ); 
+    //window.setTimeout(paint_region('<%= h @attacked_state.state_name %>', <%= h @attacked_state.alliance %>, <%= h @attacked_state.soldiers %> ), 100);
+  <% end %>
+
+  
+  
+</script>

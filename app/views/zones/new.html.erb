@@ -1,0 +1,28 @@
+<h1>New zone</h1>
+
+<% form_for(@zone) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :x %><br />
+    <%= f.text_field :x, :value => params[:x]  %>
+  </p>
+  <p>
+    <%= f.label :y %><br />
+    <%= f.text_field :y, :value => params[:y] %>
+  </p>
+  <p>
+    <%= f.label :user_id %><br />
+    <%= f.text_field :user_id, :value => @user.id %>
+  </p>
+  <p>
+    <%= f.label :soldiers %><br />
+    <%= f.text_field :soldiers, :value => 0 %>
+  </p>
+    <p>Your turns will become <%=@user.new_turns_after_expanding%> from <%=@user.turns%>. </p>
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', zones_path %>
