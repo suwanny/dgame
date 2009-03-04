@@ -1,219 +1,231 @@
-require 'gamerules'
-
 class Zone < ActiveRecord::Base
 
-  # Validation Stuff
-  # ================
+	belongs_to						:user
 
-  validates_presence_of        :x
-  validates_presence_of        :y
-  validates_presence_of        :user_id
-  validates_numericality_of    :x,            :only_integer => true,     :greater_than_or_equal_to => 0
-  validates_numericality_of    :y,            :only_integer => true,     :greater_than_or_equal_to => 0
-  validates_numericality_of    :user_id,    :only_integer => true,     :greater_than_or_equal_to => 0
-  validates_numericality_of    :soldiers,    :only_integer => true,     :greater_than_or_equal_to => 1,    :allow_nil => true
-  validate                    :unique_position
+    # Validation Stuff
+    # ================
 
-  # Functions
-  # =========
+    validates_presence_of           :x
+    validates_presence_of           :y
+    validates_presence_of           :user_id
+	validates_presence_of			:score
+    validates_numericality_of       :x,					:only_integer => true,     :greater_than_or_equal_to => 0
+    validates_numericality_of       :y,					:only_integer => true,     :greater_than_or_equal_to => 0
+    validates_numericality_of  		:user_id,			:only_integer => true,     :greater_than_or_equal_to => 0
+	validates_numericality_of       :soldiers,			:only_integer => true,     :greater_than_or_equal_to => 1,    :allow_nil => true
+	validates_numericality_of       :score,				:only_integer => true,     :greater_than_or_equal_to => 0
+    validate                        :unique_position
 
-  public
+    # Functions
+    # =========
 
-  ## Dave: Return zone from coordinate
-  def self.get_zone_from_coordinates(x, y)
-    @zone = find(:first, :conditions => "x = '#{x}' AND y = '#{y}'")
-  end
-
-  ## Returns an array of the zones without any pointless 2D grid stuff.
-  def self.find_zones_in_view_xml( x_min, x_max, y_min, y_max )
-    # find zones
-    @zones = find(:all, :conditions => "x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'")
-  end
-
-  #------------------------ alex get map data for user
-  def self.find_zones_in_view(x_min, x_max, y_min, y_max)
-
-    logger.info "XIN_DEBUG: x:#{x_min}, x:#{x_max}, y:#{y_min}, ymax:#{y_max}"
-    # for invalid input, return nil
-    if (x_min > x_max or y_min > y_max)
-      nil
-    else
-      #returns a 2D array of the zones in the current view
-
-      # 2D grid - init
-      grid = Array.new(x_max-x_min + 1) { Array.new(y_max-y_min + 1) }
-      # find zones
-      zones = find(:all, :conditions => "x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'")
-
-      # assign zones to grid
-      for zone in zones
-        grid[zone.x - x_min][zone.y - y_min] = zone
-      end
-
-      grid
+    public
+    
+    ## Returns zone at position.
+    def self.get_zone_at( x, y )
+        return find( :first, :conditions => { :x => x, :y => y } )
     end
-  end
 
-  #-------------------------Xin
-  def self.find_users_in_area(zones)
-    # return a owners list of the zones lists
-    users_in_area = Array.new(0, User.new)
-    for i in (0..zones.size - 1)
-      for j in (0..zones[i].size - 1)
-        if (zones[i][j] and zones[i][j].user_id >= 0)
-          if (users_in_area.length == 0 or not users_in_area.find{|user| user.id == zones[i][j].user_id})  # the current user has not been added
-            new_user = User.find_by_id(zones[i][j].user_id)
-            users_in_area.push(new_user)
-          end
+    ## Returns an array of the zones owned by a given user.
+    ## If the range is invalid, return nil
+    def self.find_zones_in_view_xml( x_min, x_max, y_min, y_max )
+        if x_max < x_min or y_max < y_min or x_max < 0 or y_max < 0
+            return nil
         end
-      end
+        return find(:all, :conditions => "x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'")
     end
-    users_in_area
-  end
 
-  #-----------------------------------------Shane
-  ## Returns zone at position.
-  def self.get_zone_at( x, y )
-    find( :first, :conditions => { :x => x, :y => y } )
-  end
-
-  #-----------------------------------------Shane
-  ## Returns all zones for a given user.
-  def self.get_zones_by_user( user_id )
-    find( :all, :conditions => { :user_id => user_id } )
-  end
-
-  #-----------------------------------------Shane
-  def self.get_zones_by_user_in_area( user_id, max_x, min_x, max_y, min_y )
-    find( :all, :conditions => "user_id == '#{user_id}' AND x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'" )
-  end
-
-  #-----------------------------------------Shane
-  ## Returns total # of zones for a given user.
-  def self.get_total_zones_for_user( user_id )
-    return get_zones_by_user( user_id ).size()
-  end
-
-  ## Function that returns zones expandable by the given user in a certain grid... and put it into the given
-  ## given grid object? Uh... whatever. Seems pretty deprecated to me.
-  def self.remark_expandable_zones(x_min, x_max, y_min, y_max, grid, user_id)
-
-    if not grid
-      return
+    ## Returns all zones for a given user.
+    def self.get_zones_by_user( user_id )
+        return find( :all, :conditions => { :user_id => user_id } )
     end
-    # find all the zones belonging to a certain user specified by user_id
-    zones = find(:all, :conditions => "x >= '#{x_min}' AND x <= '#{x_max}' AND \
-                                                        y >= '#{y_min}' AND y <= '#{y_max}' AND user_id = '#{user_id}'")
 
-    # find the all the neighbor zones and check if it is already expanded, if not add it to the grid
-    for zone in zones
-      for oset in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
-        xnew = zone.x + oset[0] - x_min
-        ynew = zone.y + oset[1] - y_min
-        if xnew >= grid.size() or ynew >= grid[xnew].size() or not grid[xnew]
-          break
+    ## Returns all zones for a given user within given bounds.
+    def self.get_zones_by_user_in_area( user_id, x_min, x_max, y_min, y_max )
+        return find( :all,
+                :conditions => "user_id = '#{user_id}' AND x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'" )
+    end
+
+    ## Returns all zones for a given user within given bounds.
+    def self.get_zones_in_area_not_owned_by_user( user_id, x_min, x_max, y_min, y_max )
+        return find( :all, :conditions => "user_id != '#{user_id}' AND x >= '#{x_min}' AND x <= '#{x_max}' AND y >= '#{y_min}' AND y <= '#{y_max}'" )
+    end
+
+    ## Returns total # of zones for a given user.
+    def self.get_total_zones_for_user( user_id )
+        return count( :all, :conditions => { :user_id => user_id } )
+    end
+
+    ## Returns an array of zones in a certain area that the user can attack. Doesn't take into account cost to attack. Doesn't count zones that artillery only can hit.
+    def self.get_attackable_zones_in_view( user_id, x_min, x_max, y_min, y_max )
+        user = User.find_by_id( user_id )
+        if user.nil?
+            return :user_not_found
         end
-        if not grid[xnew][ynew]
-          grid[xnew][ynew] = Zone.new
-          grid[xnew][ynew].x = zone.x + oset[0]
-          grid[xnew][ynew].y = zone.y + oset[1]
-          grid[xnew][ynew].user_id = -1
+        width         = x_max - x_min
+        height         = y_max - y_min
+        grid         = Array.new(width+3) { Array.new(height+3) }    # +3 because you need to add 1 to get the # of zones along an axis
+        # and then another 2 to put padding around the area to grow/expand.
+        # Mark each spot on the grid that the user has.
+        # ---------------------------------------------
+        base_x        = x_min-1                               # -1 because I'm making one zone of room around the user's territory.
+        base_y        = y_min-1
+
+        uzones = get_zones_by_user( user_id )
+        for z in uzones
+            grid[ z.x - base_x ][ z.y - base_y ] = true
         end
-      end
-    end
-  end
 
-  ## Returns the zones that the user can expand into. Doesn't do any culling by ocean.
-  ## Returns an array with objects with values :x and :y. So obj(:x) and obj(:y) will give you the position of them.
-  def self.get_expandable_zones( user_id )
+        # Get all zones in the area not owned by the given user. If any such zone is adjacent
+        # to a user owned zone, then throw it into a list of attackable zones.
+        # -----------------------------------------------------------------------------------
 
-    # Get the size of the user's territory and make a 2D array of it that extends one zone on either side
-    # of the user's territory.
-    # ---------------------------------------------------------------------------------------------------
+        ezones         = get_zones_in_area_not_owned_by_user( user_id, x_min-1, x_max+1, y_min-1, y_max+1 )
+        attackable     = []
 
-    bounds     = get_zone_area( user_id )
-    width     = bounds(:max_x) - bounds(:min_x)
-    height     = bounds(:max_y) - bounds(:min_y)
-    grid     = Array.new(width+3) { Array.new(height+3) }    # +3 because you need to add 1 to get the # of zones along an axis
-    # and then another 2 to put padding around the area to grow/expand.
+        for z in ezones
+            for o in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
+                x = ( z.x + o[0] - base_x )                            # These are the X and Y I'm checking to see if is owned by the player.
+                y = ( z.y + o[1] - base_y )
+                if x >= 0 && x < width+3 && y >= 0 && y < height+3
+                    if grid[x][y] == true
+                        attackable << z
+                    end
+                end
+            end
+        end
 
-    # For each zone owned by the user, mark all spots on the grid that can expanded into.
-    # Make note to offset based on relative position of the grid's origin to the world map.
-    # Note wrap-around on the world map, except along the Y-axis.
-    #
-    # Basically what I'll do is... if there's boundary conditions in play across this zone,
-    # I'll translate each point to be relative to the grid space. Later I'll retranslate
-    # these points into X/Y points on the actual world map.
-    # -------------------------------------------------------------------------------------
+        # Return the list of attackable zones!
+        # ------------------------------------
 
-    base_x    = bounds(:min_x)-1        # -1 because I'm making one zone of room around the user's territory.
-    base_y    = bounds(:min_y)-1
-    uzones    = get_zones_by_user( user_id )
-
-    for z in uzones
-      for o in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
-        grid[ z.x + o(0) - base_x ][ z.y + o(1) - base_y ] = true
-      end
+        return attackable
     end
 
-    # Get all zones in the bounding box of the expandable zone set and remove any zones
-    # from the set of expandable zones that are owned by any player.
-    # ---------------------------------------------------------------------------------
+    ## Returns an array of zones that the user can attack. Doesn't take into account cost to attack. Doesn't count zones that artillery only can hit.
+    def self.get_attackable_zones( user_id )
 
-    pzones    = find_zones_in_view_xml( bounds(:min_x)-1, bounds(:max_x)+1, bounds(:min_y)-1, bounds(:max_y)+1 )
+        bounds        = get_zone_area( user_id )
+        return get_attackable_zones_in_view( user_id, bounds[:min_x]-1, bounds[:max_x]+1, bounds[:min_y]-1, bounds[:max_y]+1 )
 
-    for z in pzones
-      grid[ z.x + o(0) - base_x ][ z.y + o(1) - base_y ] = nil
     end
 
-    # Take the 2D array and make it a list.
-    # -------------------------------------
+    ## Return the expandable zones in a certain area for the user
+    def self.get_expandable_zones_in_view(user_id, x_min, x_max, y_min, y_max)
+        width         = x_max - x_min
+        height         = y_max - y_min
+        grid         = Array.new(width+3) { Array.new(height+3) }    # +3 because you need to add 1 to get the # of zones along an axis
+        # and then another 2 to put padding around the area to grow/expand.
 
-    zlist = []
-    0.upto(width+3) do |i|
-      0.upto(height+3) do |j|
-        zlist << { :x => base_x+i, :y => base_y+j } if grid[i][j] == true    # << appends to an array.
-      end
+        # For each zone owned by the user, mark all spots on the grid that can expanded into.
+        # Make note to offset based on relative position of the grid's origin to the world map.
+        # Note wrap-around on the world map, except along the Y-axis.
+        #
+        # Basically what I'll do is... if there's boundary conditions in play across this zone,
+        # I'll translate each point to be relative to the grid space. Later I'll retranslate
+        # these points into X/Y points on the actual world map.
+        # -------------------------------------------------------------------------------------
+
+        base_x        = x_min - 1                               # -1 because I'm making one zone of room around the user's territory.
+        base_y        = y_min - 1
+        uzones        = get_zones_by_user_in_area( user_id, x_min, x_max, y_min, y_max )
+
+        for z in uzones
+            for o in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
+                grid[ z.x + o[0] - base_x ][ z.y + o[1] - base_y ] = true
+            end
+        end
+
+        # Get all zones in the bounding box of the expandable zone set and remove any zones
+        # from the set of expandable zones that are owned by any player.
+        # ---------------------------------------------------------------------------------
+
+        pzones    = find_zones_in_view_xml( x_min - 1, x_max + 1, y_min - 1, y_max + 1 )
+
+        for z in pzones
+            grid[ z.x - base_x ][ z.y - base_y ] = nil
+        end
+
+        # Take the 2D array and make it a list.
+        # -------------------------------------
+
+        zlist = []
+        0.upto(width+3) do |i|
+            0.upto(height+3) do |j|
+                zlist << { :x => base_x+i, :y => base_y+j } if grid[i] and grid[i][j] == true    # << appends to an array.
+            end
+        end
+
+        # Return the list
+        # ---------------
+
+        return zlist
     end
 
-    # Return the list
-    # ---------------
+    ## Returns the zones that the user can expand into. Doesn't do any culling by ocean. Yet.
+    ## Returns an array with objects with values :x and :y. So obj[:x] and obj[:y] will give you the position of them, in terms of integer zone coordinates.
+    def self.get_expandable_zones( user_id )
 
-    return zlist
-
-  end
-
-  ## Returns a hash with :max_x, :max_y, :min_y, :min_x
-  def self.get_zone_area( user_id )
-    maxx = maximum( :x, :conditions => { :user_id => user_id } )
-    return { :max_x => 0, :max_y => 0, :min_x => 0, :min_y => 0 } if maxx.nil?
-
-    maxy = maximum( :y, :conditions => { :user_id => user_id } )
-    minx = minimum( :x, :conditions => { :user_id => user_id } )
-    miny = minimum( :y, :conditions => { :user_id => user_id } )
-
-    return { :max_x => maxx, :max_y => maxy, :min_x => minx, :min_y => miny }
-  end
-
-  def self.get_zone_size( user_id )
-    bounds = get_zone_area( user_id )
-    return { :width =>     bounds(:max_x) - bounds(:min_x),
-        :height =>    bounds(:max_y) - bounds(:min_y) }
-  end
-
-  private
-
-  def unique_position
-    zHere = Zone.find( :all, :conditions => { :x => x, :y => y } )
-
-    #errors.add( :x, 'Duplicate zone at position.' ) if zHere.size > 0
-    #errors.add( :y, 'Duplicate zone at position.' ) if zHere.size > 0
-
-    for z in zHere
-      if z.id != id then
-        errors.add( :x, 'Duplicate zone at position.' )
-        errors.add( :y, 'Duplicate zone at position.' )
-      end
+        # Get the size of the user's territory and make a 2D array of it that extends one zone on either side
+        # of the user's territory.
+        # ---------------------------------------------------------------------------------------------------
+        bounds        = get_zone_area( user_id )
+        return get_expandable_zones_in_view(user_id, bounds[:min_x], bounds[:max_x], bounds[:min_y], bounds[:max_y])
     end
-  end
+
+    ## Returns the bounds of the given user's territory by integer zone coordinates.
+    ## Returns a hash with :max_x, :max_y, :min_y, :min_x
+    def self.get_zone_area( user_id )
+        maxx = maximum( :x, :conditions => { :user_id => user_id } )
+        return { :max_x => 0, :max_y => 0, :min_x => 0, :min_y => 0 } if maxx.nil?
+
+        maxy = maximum( :y, :conditions => { :user_id => user_id } )
+        minx = minimum( :x, :conditions => { :user_id => user_id } )
+        miny = minimum( :y, :conditions => { :user_id => user_id } )
+
+        return { :max_x => maxx, :max_y => maxy, :min_x => minx, :min_y => miny }
+    end
+
+    ## Returns the size of the given user's territory by integer width and height.
+    ## Returns a hash with :width and :height.
+    def self.get_zone_size( user_id )
+        bounds = get_zone_area( user_id )
+        return { :width => bounds[:max_x] - bounds[:min_x],    :height => bounds[:max_y] - bounds[:min_y] }
+    end
+
+    #-------------------------Xin
+    def self.find_users_in_area(zones)
+        if zones == nil
+            return nil
+        end
+        # return a owners list of the zones lists
+        users_in_area = Array.new(0, User.new)
+        for zone in zones
+            if (users_in_area.length == 0 or not users_in_area.detect {|user| user.id == zone.user_id})  # the current user has not been added
+                new_user = User.find_by_id(zone.user_id)
+                users_in_area.push(new_user)
+            end
+        end
+        return users_in_area
+    end
+
+    private
+
+    ## Validation method. Should enforce that a zone is the only zone for this location.
+    ## The loop is there because when you update a zone's fields and save it, this gets checked again.
+    ## So you need to check if there it's the only one in there for that location, or not at all if
+    ## it's not put in there yet.
+
+    def unique_position
+        zHere = Zone.find( :all, :conditions => { :x => x, :y => y } )
+
+        #errors.add( :x, 'Duplicate zone at position.' ) if zHere.size > 0
+        #errors.add( :y, 'Duplicate zone at position.' ) if zHere.size > 0
+
+        for z in zHere
+            if z.id != id then
+                errors.add( :x, 'Duplicate zone at position.' )
+                errors.add( :y, 'Duplicate zone at position.' )
+            end
+        end
+    end
 end

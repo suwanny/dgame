@@ -1,18 +1,20 @@
 <H1>DGame Ranking</H1>
 
-<table width=600 border="1" cellspacing="0" cellpadding="3" bordercolor="#000066" >
-  <tr>
-    <th>User name </th>
-    <th>Total Zones</th>
-    <th>Turns</th>
-    <th>Soldiers</th>
-  </tr>
-  <% for rank in @user_ranking %>
-  <tr>
-    <td><%=h rank.name %></td>
-    <td><%=h rank.total_zones %></td>
-    <td><%=h rank.turns %></td>
-    <td><%=h rank.total_soldiers %></td>
-  </tr>
-  <% end %>
+<table border="0" cellspacing="2" cellpadding="3" bordercolor="#000066">
+    <tr>
+        <td bgcolor="#a2a2f2" width="90">User name</td>
+        <td bgcolor="#a2a2f2" width="75">Zones</td>
+        <td bgcolor="#a2a2f2" width="75">Soldiers</td>
+        <td bgcolor="#a2a2f2" width="75">Soldiers/zone</td>
+        <td bgcolor="#a2a2f2" width="60">Turns</td>
+    </tr>
+    <% for rank in @user_ranking %>
+        <tr>
+            <td bgcolor="#efefff"><%= h rank.name %></td>
+            <td bgcolor="#efefff"><%= h rank.total_zones %></td>
+            <td bgcolor="#efefff"><%= h rank.total_soldiers %></td>
+            <td bgcolor="#efefff"><%= h ("%.03f" % (rank.avg_soldiers_per_zone)).to_f %></td>
+            <td bgcolor="#efefff"><%= h rank.turns %></td>
+        </tr>
+    <% end %>
 </table>

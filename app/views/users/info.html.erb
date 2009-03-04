@@ -4,10 +4,13 @@
   <p>
     <b>Name: </b><%= h @user.name %><br/>
     <b>Turns: </b><%= h @user.turns %><br/>
+    <b>Total Zones: </b><%= h @user.total_zones %><br/>
     <b>Soldiers: </b><%= h @user.total_soldiers %><br/>
+    <b>Average Soldiers per Zone: </b><%= h ("%.03f" % (@user.avg_soldiers_per_zone)).to_f %><br/>
     <b>Alliance: </b><%= h UsersHelper.getAllianceStr(@user.alliance) %><br/>
     <b>View port: </b><%= h @user.viewport_x %>, <%= h @user.viewport_y %><br/>
       <b>Last time you gain your turns: </b><%=h @user.last_time_turns_commit %><br/>
+      <b>Last time you login: </b><%=h @user.last_time_login %><br/>
   </p>
 
   <br>

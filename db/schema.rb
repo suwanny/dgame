@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090213041408) do
+ActiveRecord::Schema.define(:version => 20090302013857) do
 
   create_table "events", :force => true do |t|
     t.integer  "user_id"
@@ -30,18 +30,18 @@ ActiveRecord::Schema.define(:version => 20090213041408) do
   add_index "sessions", ["updated_at"], :name => "index_sessions_on_updated_at"
 
   create_table "states", :force => true do |t|
-    t.string   "state_name", :null => false
-    t.integer  "user_id", :null => false
-    t.integer  "soldiers",:default =>0, :null => false
-    t.integer  "alliance", :null => false
+    t.string   "state_name"
+    t.integer  "user_id"
+    t.integer  "soldiers"
+    t.integer  "alliance"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "users", :force => true do |t|
-    t.string   "name", :null => false
-    t.string   "hashed_password", :null => false
-    t.string   "salt", :null => false
+    t.string   "name"
+    t.string   "hashed_password"
+    t.string   "salt"
     t.string   "email"
     t.integer  "turns"
     t.integer  "alliance"
@@ -55,15 +55,23 @@ ActiveRecord::Schema.define(:version => 20090213041408) do
     t.float    "viewport_y"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "color_r"
+    t.integer  "color_g"
+    t.integer  "color_b"
+    t.integer  "jammingcount"
   end
 
   create_table "zones", :force => true do |t|
-    t.integer  "x" , :null => false
-    t.integer  "y" , :null => false
-    t.integer  "user_id", :null => false
+    t.integer  "x"
+    t.integer  "y"
+    t.integer  "user_id"
     t.integer  "soldiers"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "artillery"
+    t.boolean  "jamming"
+    t.boolean  "bunker"
+    t.integer  "score"
   end
 
 end
