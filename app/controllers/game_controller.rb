@@ -81,14 +81,14 @@ class GameController < ApplicationController
 	def expand_into_zone
 		@result = UserZone.expand_into_zone( session[:user_id], params[:targetX].to_i, params[:targetY].to_i )
 		respond_to do |format|
-			#format.html do
-            #    if (@result == true)
-            #        redirect_to( :controller => 'zones', :action => 'index' )
-            #    else
-            #        flash[:notice] = @result
-            #        redirect_to( :controller => 'zones', :action => 'index' )
-            #    end
-            #end
+			format.html do
+                if (@result == true)
+                    redirect_to( :controller => 'zones', :action => 'index' )
+                else
+                    flash[:notice] = @result
+                    redirect_to( :controller => 'zones', :action => 'index' )
+                end
+            end
 			format.xml { render :layout => false}
 		end
 	end
@@ -180,14 +180,14 @@ class GameController < ApplicationController
 		#end
 		
 		respond_to do |format|
-			#format.html do
-            #    if (@result == true)
-            #        redirect_to(:controller => 'zones', :action => 'index')
-            #    else
-            #        flash[:notice] = @result
-            #        redirect_to(:controller => 'zones', :action => 'index')
-            #    end
-            #end
+			format.html do
+                if (@result == true)
+                    redirect_to(:controller => 'zones', :action => 'index')
+                else
+                    flash[:notice] = @result
+                    redirect_to(:controller => 'zones', :action => 'index')
+                end
+            end
 			format.xml { render :layout => false}
 		end           		
 	end

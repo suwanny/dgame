@@ -15,6 +15,7 @@ class ScalabilityTest
     ## methods
     public
 
+
     ## This method is for the scalability tests
     ## create n test users with the names "a#" (from a1 ~ an) and password "a"
     ## In MYSQL (execute: ruby script/dbconsole) you can execute:
@@ -102,4 +103,39 @@ class ScalabilityTest
         result = UserZone.attack_zone( user_id, zone_to_attack[:x], zone_to_attack[:y])
         return result
     end
+
+    ## This method is for the scalability tests
+    ## randomly expand or attack a zone from the candidates for the current user
+    ## mode:
+    #        :MODE_EXPAND - only expand
+    ##       :MODE_ATTACK - only attack
+    ##       :MODE_EXPAND_ATTACK - either expand or attack
+    
+    def self.random_expand_or_attack(user_id, mode)
+        user = User.find_by_id(user_id)
+        if user == nil
+            return false
+        end
+        zones_attack = Zone.get_attackable_zones(user_id)
+        zones_expand = Zone.get_expandable_zones(user_id)
+
+        if zones_attack == nil and zones_expand == nil
+            return false
+        end
+
+        count_attack = (zones_attack and mode != :MODE_EXPAND) ? zones_attack.size() : 0
+        count_expand = (zones_expand and mode != :MODE_ATTACK) ? zones_expand.size() : 0
+
+        srand()
+        rand_pos = (rand() * (count_attack + count_expand)).to_i
+
+        if rand_pos >= count_attack     # for expand
+            zone_to_expand = zones_expand[rand_pos - count_attack]
+            return UserZone.expand_into_zone( user_id, zone_to_expand[:x], zone_to_expand[:y])
+        else
+            zone_to_attack = zones_attack[rand_pos]
+            return UserZone.attack_zone( user_id, zone_to_attack[:x], zone_to_attack[:y])
+        end
+    end
+
 end

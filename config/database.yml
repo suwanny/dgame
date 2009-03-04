@@ -20,7 +20,7 @@ development:
   database: dgame_development
   pool: 5
   username: root
-  password: 
+  password: dgame
   host: localhost
 
 # Warning: The database defined as "test" will be erased and
@@ -32,7 +32,7 @@ test:
   database: dgame_test
   pool: 5
   username: root
-  password: 
+  password: dgame
   host: localhost
 
 production:
@@ -41,5 +41,5 @@ production:
   database: dgame_production
   pool: 5
   username: root
-  password: 
+  password: dgame
   host: localhost

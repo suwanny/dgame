@@ -94,7 +94,7 @@
             </div>
         <%
            end
-           end %> 
+           end %>
 
     <!--- attackable zones --->
     <%
@@ -123,7 +123,7 @@
                 <tr height="<%= @grid_w %>">
                     <td width="<%= @grid_w*1.5 %>">
                         <table bgcolor="#<%= get_color_hex(other_user.id) %>" width="<%= @grid_w %>" height="<%= @grid_w %>">
-                        <tr><td></td></tr>    
+                        <tr><td></td></tr>
                         </table>
                     </td>
                     <td width="150"><%= other_user.name %></td>
@@ -178,5 +178,9 @@
 </div>
 
 <br>
-<%= button_to "Train Soldier", {:controller => "game", :action => "train_soldiers", :turncount => GameRules::TURNS_PER_TRAINING} %>
+<% if @user%>
+<%= button_to "Train Soldier",
+    {:controller => "game", :action => "train_soldiers",
+     :targetX => @user.viewport_x.to_i, :targetY => @user.viewport_y.to_i} %>
+<% end %>
 

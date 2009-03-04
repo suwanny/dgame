@@ -272,7 +272,7 @@ class UserZone
 
 			soldiermove = false
 			for z in adj_zones do
-				if z.soldiers > 1
+				if z.soldiers and z.soldiers > 1
 					z.soldiers -= 1   		# Move this soldier into the zone.
 					affectedzones << z
 					soldiermove = true
@@ -297,6 +297,9 @@ class UserZone
 			z = Zone.new( :x => targetX, 	:y => targetY, 		:user_id => user.id,
 						  :soldiers => 1, 	:bunker => false, 	:artillery => false, :jamming => false,
 						  :score => zoneScore )
+            if user.score == nil
+                user.score = 0
+            end
 			user.score += zoneScore
 			affectedzones << z
 

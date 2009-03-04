@@ -65,6 +65,8 @@ class UsersController < ApplicationController
             @user.last_time_login = Time.now
             @user.last_time_turns_commit = Time.now
 
+            #more operations on the default values
+
             if @user.save
                 session[:user_id]  = @user.id
                 session[:user_name] = @user.name

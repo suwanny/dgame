@@ -12,23 +12,23 @@ class User < ActiveRecord::Base
     validates_presence_of       :name
     validates_presence_of       :total_soldiers
     validates_presence_of       :turns
-	validates_presence_of		:color_r
-	validates_presence_of		:color_g
-	validates_presence_of		:color_b
-	validates_presence_of		:jammingcount
+#	validates_presence_of		:color_r
+#	validates_presence_of		:color_g
+#	validates_presence_of		:color_b
+#	validates_presence_of		:jammingcount
     validates_uniqueness_of     :name
     validates_numericality_of  	:total_zones,    	:only_integer => true,  :greater_than_or_equal_to => 0
     validates_numericality_of  	:total_soldiers,  	:only_integer => true,  :greater_than_or_equal_to => 0
     validates_numericality_of  	:turns,        		:only_integer => true,  :greater_than_or_equal_to => 0
-	validates_numericality_of  	:jammingcount, 		:only_integer => true,  :greater_than_or_equal_to => 0	
-	validates_numericality_of  	:color_r,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
-	validates_numericality_of  	:color_g,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
-	validates_numericality_of  	:color_b,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+#	validates_numericality_of  	:jammingcount, 		:only_integer => true,  :greater_than_or_equal_to => 0
+#	validates_numericality_of  	:color_r,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+#	validates_numericality_of  	:color_g,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+#	validates_numericality_of  	:color_b,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
     validates_confirmation_of   :password
     validate                    :password_non_blank
     validate          			:total_zones_equals_zone_count
-	validate					:total_soldiers_equal_zone_soldier_total
-	validate					:score_is_sum_of_owned_zones
+#	validate					:total_soldiers_equal_zone_soldier_total
+#	validate					:score_is_sum_of_owned_zones
 
     # Functions
     # =========
@@ -206,6 +206,36 @@ class User < ActiveRecord::Base
        end
     end
 
+=begin
+    def self.login(name, password)
+        user = authenticate( name, password )
+        if user
+            oldTurns = user.turns
+            user.update_turns_by_time()
+            user.update_last_login()
+            successMsg = "#{user.turns - oldTurns} turns gained after login."
+            if not user.save
+                return false#user.get_error_msg + "Can not update user data!"
+            else
+                #flash[:notice] = successMsg
+            end
+
+            session[:user_id] = user.id
+            session[:user_name] = user.name
+            session[:turns] = user.turns
+            session[:soldiers] = user.total_soldiers
+            session[:alliance] = user.alliance   # for StatesGame
+            session[:zones] = user.total_zones        # for StatesGame
+
+            return true #successMsg
+            #redirect_to( :action => "info" )
+        else
+            return false
+            #flash[:notice] = "Invalid User/Password."
+            #redirect_to( :action => "index" )
+        end
+    end
+=end
     private
 
     def password_non_blank
@@ -228,11 +258,14 @@ class User < ActiveRecord::Base
 		zones = Zone.get_zones_by_user( self.id )
 		total = 0
 		for z in zones
-			total += z.soldiers
+            if z.soldiers
+			    total += z.soldiers
+            end
 		end
 
 		if total != self.total_soldiers
-        	errors.add( :total_soldiers, "Soldier count for user doesn't match soldiers in zones!")
+            self.total_soldiers = total
+        	#errors.add( :total_soldiers, "Soldier count for user doesn't match soldiers in zones!")
 		end
 	end
 
@@ -240,11 +273,14 @@ class User < ActiveRecord::Base
 		zones = Zone.get_zones_by_user( self.id )
 		total = 0
 		for z in zones
-			total += z.score
+            if z.score
+			    total += z.score
+            end
 		end
 
 		if total != self.score
-			errors.add( :score, "Score is not a summation of all the zones' scores" )
+            self.score = total
+#			errors.add( :score, "Score is not a summation of all the zones' scores" )
 		end
 	end
 

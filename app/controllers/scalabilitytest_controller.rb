@@ -13,10 +13,10 @@ class ScalabilitytestController < ApplicationController
         if @user == nil
             redirect_to( :controller => "users", :action => "index" )
         else
-            @result = ScalabilityTest.random_expand_zone(@user.id)
+            @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_EXPAND)
             if @result != true
                 flash[:notice] = @result
-            end if
+            end
             redirect_to( :controller => "zones", :action => "index" )
         end
     end
@@ -27,11 +27,104 @@ class ScalabilitytestController < ApplicationController
         if @user == nil
             redirect_to( :controller => "users", :action => "index" )
         else
-            @result = ScalabilityTest.random_attack_zone(@user.id)
+            @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_ATTACK)
             if @result != true
                 flash[:notice] = @result
-            end if
+            end
             redirect_to( :controller => "zones", :action => "index" )
+        end
+    end
+
+    ## execute this script by using the url "http://URL/scalabilitytest/random_expand_or_attack"
+    def random_expand_or_attack
+        @user = User.find_by_id( session[:user_id] )
+        if @user == nil
+            redirect_to( :controller => "users", :action => "index" )
+        else
+            @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_EXPAND_ATTACK)
+            if @result != true
+                flash[:notice] = @result
+            end
+            redirect_to( :controller => "zones", :action => "index" )
+        end
+    end
+
+    ## execute this script by using the url "http://URL/scalabilitytest/random_operation"
+    def random_operation
+        @user = User.find_by_id( session[:user_id] )
+        if @user == nil
+            redirect_to( :controller => "users", :action => "index" )
+        else
+            if (@user.avg_soldiers_per_zone < 1)
+                #UserZone.train_soldiers(@user.id, GameRules::TURNS_PER_TRAINING)
+            else
+                @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_EXPAND_ATTACK)
+                if @result != true
+                    flash[:notice] = @result
+                end
+            end
+            redirect_to( :controller => "zones", :action => "index" )
+        end
+    end
+
+    ## execute tthis script by using the url "http://URL/scalabilitytest/random_login"
+    def random_login
+        if random_login_internal
+            redirect_to( :controller => "users", :action => "info" )
+        else
+            redirect_to( :controller => "users", :action => "index" )
+        end
+    end
+
+    ## execute this script by using the url "http://URL/scalabilitytest/create_10000_random_zone_records"
+    def create_10000_random_zone_records()
+        for time in (1..100)
+            random_login_internal
+            for i in (1..100)
+                @user = User.find_by_id( session[:user_id] )
+                if @user == nil
+                    redirect_to( :controller => "users", :action => "index" )
+                else
+                    if (@user.avg_soldiers_per_zone < 1)
+                    #    UserZone.train_soldiers(@user.id, GameRules::TURNS_PER_TRAINING)
+                    else
+                        @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_EXPAND_ATTACK)
+                        if @result != true
+                            flash[:notice] = @result
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+private
+
+    def random_login_internal
+        i = (rand() * ScalabilityTest::TEST_NEWUSER_COUNT + 1).to_i
+        user = User.authenticate( "a#{i}", ScalabilityTest::TEST_NEWUSER_PASSWORD )
+        if user
+            oldTurns = user.turns
+            user.update_turns_by_time()
+            user.update_last_login()
+            successMsg = "#{user.turns - oldTurns} turns gained after login."
+            if not user.save
+                flash[:notice] = user.get_error_msg
+                flash[:notice] += "Can not update user data!"
+            else
+                flash[:notice] = successMsg
+            end
+
+            session[:user_id] = user.id
+            session[:user_name] = user.name
+            session[:turns] = user.turns
+            session[:soldiers] = user.total_soldiers
+            session[:alliance] = user.alliance   # for StatesGame
+            session[:zones] = user.total_zones        # for StatesGame
+            return true
+        else
+            flash[:notice] = "Invalid User/Password."
+            return false
         end
     end
 end
