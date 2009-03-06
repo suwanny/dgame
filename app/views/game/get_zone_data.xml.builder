@@ -3,7 +3,7 @@ if @result.type == Zone.type
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_zone_data" ) do
 		for z in @result
 			if z.user.jammingcount > 0 && z.user_id != @userid
 				xml.zone( "x" => z.x, "y" => z.y, "id" => z.user_id, "user" => z.user.name )

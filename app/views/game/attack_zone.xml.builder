@@ -3,7 +3,7 @@ if @result.class == Hash
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0, "result" => @result[:result], "time" => ( @result[:time].to_f * 1000.0 ).to_i ) do
+	xml.status( "code" => 0, "result" => @result[:result], "time" => ( @result[:time].to_f * 1000.0 ).to_i, "controller_called" => "attack_zone" ) do
 		for z in @result[:czones]
 			if z.user.jammingcount > 0 && z.user_id != @userid
 				xml.zone( "x" => z.x, "y" => z.y, "id" => z.user_id, "user" => z.user.name )
@@ -11,7 +11,22 @@ if @result.class == Hash
 				xml.zone( "x" => z.x, "y" => z.y, "id" => z.user_id, "user" => z.user.name,
 						  "soldiers" => z.soldiers, "bunker" => z.bunker, "artillery" => z.artillery, "jamming" => z.jamming )
 			end
-	  	end
+		end
+
+		auser = @result[:auser]
+		duser = @result[:duser]
+
+		xml.userinfo( "name" 			=> auser.name, 				"score" 		=> auser.score,
+					  "info" 			=> auser.public_info,		"email"			=> auser.email,
+					  "color_r"			=> auser.color_r,			"color_g"   	=> auser.color_g,
+				      "color_b"			=> auser.color_b,			"turns"			=> auser.turns,
+			 	      "total_soldiers"	=> auser.total_soldiers,	"total_zones"	=> auser.total_zones,
+					  "viewport_x"		=> auser.viewport_x,		"viewport_y"	=> auser.viewport_y )
+
+		xml.userinfo( "name" 			=> duser.name, 				"score" 		=> duser.score,
+					  "info" 			=> duser.public_info,		"email"			=> duser.email,
+					  "color_r"			=> duser.color_r,			"color_g"   	=> duser.color_g,
+				      "color_b"			=> duser.color_b )
 	end
 
 else

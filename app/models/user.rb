@@ -27,7 +27,7 @@ class User < ActiveRecord::Base
     validates_confirmation_of   :password
     validate                    :password_non_blank
     validate          			:total_zones_equals_zone_count
-#	validate					:total_soldiers_equal_zone_soldier_total
+	validate					:total_soldiers_equal_zone_soldier_total
 #	validate					:score_is_sum_of_owned_zones
 
     # Functions
@@ -255,31 +255,19 @@ class User < ActiveRecord::Base
 	end
 
 	def total_soldiers_equal_zone_soldier_total
-		zones = Zone.get_zones_by_user( self.id )
-		total = 0
-		for z in zones
-            if z.soldiers
-			    total += z.soldiers
-            end
-		end
+        totalSoldiers = Zone.sum('soldiers',  :conditions => { :user_id => self.id })
 
-		if total != self.total_soldiers
-            self.total_soldiers = total
+		if totalSoldiers != self.total_soldiers
+            self.total_soldiers = totalSoldiers
         	#errors.add( :total_soldiers, "Soldier count for user doesn't match soldiers in zones!")
 		end
 	end
 
 	def score_is_sum_of_owned_zones
-		zones = Zone.get_zones_by_user( self.id )
-		total = 0
-		for z in zones
-            if z.score
-			    total += z.score
-            end
-		end
+        totalScores = Zone.sum('score',  :conditions => { :user_id => self.id })
 
-		if total != self.score
-            self.score = total
+		if totalScores != self.score
+            self.score = totalScores
 #			errors.add( :score, "Score is not a summation of all the zones' scores" )
 		end
 	end

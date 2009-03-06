@@ -3,7 +3,7 @@ if @result != nil
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_single_zone_info" ) do
 		if @result.user.jammingcount > 0 && @result.user_id != @userid
 			xml.zone( "x" => @result.x, "y" => @result.y, "id" => @result.user_id, "user" => @result.user.name )
 		else

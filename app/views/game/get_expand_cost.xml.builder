@@ -3,7 +3,7 @@ if @result.is_a?(Numeric)
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_expand_cost" ) do
 			xml.expandcost( "cost" => @result )
 	end
 

@@ -116,8 +116,11 @@ public
 		# =============================
 
 		dSoldiers	= defending_zone.soldiers
+        dSoldiers = 0 if dSoldiers == nil
 		dpower		= ATTACK_POWER_SOLDIER * dSoldiers
-        dpower 		*= BUNKER_DEFENSE_MULTIPLIER if duser.bunker
+
+        # formally it was duser.bunker but syntax error?
+        dpower 		*= BUNKER_DEFENSE_MULTIPLIER if defending_zone.bunker
 
 		for z in support_defenders			
 			dpower += ATTACK_POWER_ARTILLERY if z.artillery == true
@@ -128,6 +131,10 @@ public
 
 		srand()      
 		baseP		= [ 50 - 4*dpower/20, 10 ].max 			# Base probability
+
+        #temporary: dpower should not be 0 in the later versoins
+        dpower = 1 if dpower == 0
+
 		prop		= ( baseP * apower / dpower ) / 100.0   # more than 1 means definitely wins
 		results 	= {}
 

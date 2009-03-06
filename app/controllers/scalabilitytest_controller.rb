@@ -3,27 +3,25 @@
 class ScalabilitytestController < ApplicationController
     ## execute this script by using the url "http://URL/scalabilitytest/add_new_users"
     def add_new_users
-        ScalabilityTest.add_new_users(ScalabilityTest::TEST_NEWUSER_COUNT)
+        flash[:notice] = ScalabilityTest.add_new_users(ScalabilityTest::TEST_NEWUSER_COUNT)
         redirect_to( :controller => "users", :action => "ranking" )
     end
 
     ## execute this script by using the url "http://URL/scalabilitytest/random_expand_zone"
     def random_expand_zone
-        @user = User.find_by_id( session[:user_id] )
+        @user = User.find_by_name(get_random_user_name)
         if @user == nil
             redirect_to( :controller => "users", :action => "index" )
         else
             @result = ScalabilityTest.random_expand_or_attack(@user.id, :MODE_EXPAND)
-            if @result != true
-                flash[:notice] = @result
-            end
+            flash[:notice] = @result
             redirect_to( :controller => "zones", :action => "index" )
         end
     end
 
     ## execute this script by using the url "http://URL/scalabilitytest/random_attack_zone"
     def random_attack_zone
-        @user = User.find_by_id( session[:user_id] )
+        @user = User.find_by_name(get_random_user_name)
         if @user == nil
             redirect_to( :controller => "users", :action => "index" )
         else
@@ -37,7 +35,7 @@ class ScalabilitytestController < ApplicationController
 
     ## execute this script by using the url "http://URL/scalabilitytest/random_expand_or_attack"
     def random_expand_or_attack
-        @user = User.find_by_id( session[:user_id] )
+        @user = User.find_by_name(get_random_user_name)
         if @user == nil
             redirect_to( :controller => "users", :action => "index" )
         else
@@ -101,8 +99,8 @@ class ScalabilitytestController < ApplicationController
 private
 
     def random_login_internal
-        i = (rand() * ScalabilityTest::TEST_NEWUSER_COUNT + 1).to_i
-        user = User.authenticate( "a#{i}", ScalabilityTest::TEST_NEWUSER_PASSWORD )
+        user_name = get_random_user_name
+        user = User.authenticate( user_name, ScalabilityTest::TEST_NEWUSER_PASSWORD )
         if user
             oldTurns = user.turns
             user.update_turns_by_time()
@@ -126,5 +124,9 @@ private
             flash[:notice] = "Invalid User/Password."
             return false
         end
+    end
+
+    def get_random_user_name
+        return "a"+(rand() * ScalabilityTest::TEST_NEWUSER_COUNT + 1).to_i.to_s
     end
 end

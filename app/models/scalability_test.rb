@@ -36,12 +36,12 @@ class ScalabilityTest
                     next
                 end
                 user.password = TEST_NEWUSER_PASSWORD;
-                user.total_soldiers = TEST_NEWUSER_SOLDIERS;
+                user.total_soldiers = 0;
                 user.turns = TEST_NEWUSER_TURNS
                 user.last_time_login = Time.now
                 user.last_time_turns_commit = Time.now
                 user.total_zones = 0
-                user.save
+                return :user_not_save if not user.save
 
                 newx = TEST_NEWUSER_STARTX + (i - 1) % TEST_NEWUSER_USER_PER_ROW * TEST_NEWUSER_SPANX
                 newy = TEST_NEWUSER_STARTY + (i - 1) / TEST_NEWUSER_USER_PER_ROW * TEST_NEWUSER_SPANY
@@ -53,55 +53,16 @@ class ScalabilityTest
                     azone = Zone.new
                     azone.x = newx
                     azone.y = newy
-                    azone.soldiers = 1  #default value
+                    azone.score = 0
+                    azone.soldiers = TEST_NEWUSER_SOLDIERS  #default value
                 end
                 azone.user_id = user.id
-                azone.save
+                return :azone_not_save if not azone.save
 
                 user.total_zones = 1
-                user.save
+                return :user_not_final_save if not user.save
             end
         end
-    end
-
-    ## This method is for the scalability tests
-    ## randomly expand a zone from the candidates of the expandable zones for the current user
-    def self.random_expand_zone(user_id)
-        user = User.find_by_id(user_id)
-        if user == nil
-            return false
-        end
-        zones = Zone.get_expandable_zones(user_id)
-        if zones == nil
-            return false
-        end
-        srand()
-        zone_to_expand = zones[(rand() * zones.size()).to_i]
-        if zone_to_expand == nil
-            return false
-        end
-        result = UserZone.expand_into_zone( user_id, zone_to_expand[:x], zone_to_expand[:y])
-        return result
-    end
-
-    ## This method is for the scalability tests
-    ## randomly attack a zone from the candidates of the attackable zones for the current user
-    def self.random_attack_zone(user_id)
-        user = User.find_by_id(user_id)
-        if user == nil
-            return false
-        end
-        zones = Zone.get_attackable_zones(user_id)
-        if zones == nil
-            return false
-        end
-        srand()
-        zone_to_attack = zones[(rand() * zones.size()).to_i]
-        if zone_to_attack == nil
-            return false
-        end
-        result = UserZone.attack_zone( user_id, zone_to_attack[:x], zone_to_attack[:y])
-        return result
     end
 
     ## This method is for the scalability tests
@@ -116,24 +77,35 @@ class ScalabilityTest
         if user == nil
             return false
         end
-        zones_attack = Zone.get_attackable_zones(user_id)
-        zones_expand = Zone.get_expandable_zones(user_id)
 
-        if zones_attack == nil and zones_expand == nil
-            return false
+        zones_attack = Zone.get_attackable_zones(user_id) if mode != :MODE_EXPAND
+        zones_expand = Zone.get_expandable_zones(user_id) if mode != :MODE_ATTACK
+
+        count_attack = (zones_attack) ? zones_attack.size() : 0
+        count_expand = (zones_expand) ? zones_expand.size() : 0
+
+        if count_attack == 0 and count_expand == 0
+            return :no_candidate
         end
-
-        count_attack = (zones_attack and mode != :MODE_EXPAND) ? zones_attack.size() : 0
-        count_expand = (zones_expand and mode != :MODE_ATTACK) ? zones_expand.size() : 0
 
         srand()
         rand_pos = (rand() * (count_attack + count_expand)).to_i
 
         if rand_pos >= count_attack     # for expand
             zone_to_expand = zones_expand[rand_pos - count_attack]
+            for o in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
+                UserZone.train_soldiers(user_id, zone_to_expand[:x] + o[0], zone_to_expand[:y] + o[1])
+                UserZone.train_soldiers(user_id, zone_to_expand[:x] + o[0], zone_to_expand[:y] + o[1])
+            end
             return UserZone.expand_into_zone( user_id, zone_to_expand[:x], zone_to_expand[:y])
         else
             zone_to_attack = zones_attack[rand_pos]
+            for i in (0..(rand() % 4))
+                for o in GameRules::ZONE_EXPANDABLE_AREA_OFFSETS
+                    UserZone.train_soldiers(user_id, zone_to_attack[:x] + o[0], zone_to_attack[:y] + o[1])
+                    UserZone.train_soldiers(user_id, zone_to_attack[:x] + o[0], zone_to_attack[:y] + o[1])
+                end
+            end
             return UserZone.attack_zone( user_id, zone_to_attack[:x], zone_to_attack[:y])
         end
     end

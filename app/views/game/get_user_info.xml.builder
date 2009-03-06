@@ -3,7 +3,7 @@ if @result.type == User.type
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_user_info" ) do
 		if @userid == @result.id
 			xml.userinfo( "name" 			=> @result.name, 			"score" 		=> @result.score,
 						  "info" 			=> @result.public_info,		"email"			=> @result.email,

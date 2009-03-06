@@ -3,7 +3,7 @@ if @error.nil?
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_expandable_zones" ) do
 		for r in @result
 			xml.zone( "x" => r.x, "y" => r.y )
 		end

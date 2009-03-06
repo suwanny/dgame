@@ -110,8 +110,23 @@ class UserZone
 				dzone.soldiers		= 1					# Move one soldier into the acquired zone.
 				auser.total_zones 	+= 1				# Add one zone to the attacking user
                 duser.total_zones 	-= 1				# Subtract one zone from the defender.
-				auser.score			+= dzone.score
-				duser.score			-= dzone.score
+
+
+                # to be compatible with the old database (a lot of nil fields)
+                dzone.score = 0 if dzone.score == nil
+
+                # to be compatible with the old database (a lot of nil fields)
+                if auser.score
+                    auser.score			+= dzone.score
+                else
+                    auser.score = dzone.score
+                end
+
+                if duser.score
+                    duser.score			-= dzone.score
+                else
+                    duser.score = 0
+                end
 
 				dzone.bunker 		= false				# Always kill the bunker.
 
@@ -128,10 +143,12 @@ class UserZone
 				# +1 since a soldier was moved into the zone to attack.
 				# -----------------------------------------------------------
 
+                # Xin: possible to have endless loops, should check the validity of rVal
 				aRemove			= aLoss + 1
 				while aRemove > 0
 					for a in azones do
 						rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
+                        rVal = 1 if rVal <= 0        # added by Xin
 						aRemove 	-= rVal
 						a.soldiers 	-= rVal
 					end
@@ -154,14 +171,22 @@ class UserZone
 			   		duser.total_soldiers -= dFlee			# Nowhere for them to run.
 				else
 					dLeftToFlee = dFlee
-					for i in 0..( fZones.size() ) do
+					for i in 0..( fZones.size() - 1) do       # Xin: formerly it was 0..( fZones.size())  
 			   			if i == fZones.size()-1
-							fZones[i].soldiers += dLeftToFlee
+                            if fZones[i].soldiers
+							    fZones[i].soldiers += dLeftToFlee
+                            else
+                                fZones[i].soldiers = dLeftToFlee
+                            end
 						else
 							rval = ( dFlee/3 ).floor
-							dLeftToFlee -= rval
-							fZones[i].soldiers += rval	  
-						end
+							dLeftToFlee -= rval 
+                            if fZones[i].soldiers
+							    fZones[i].soldiers += rval
+                            else
+                                fZones[i].soldiers = rval
+                            end
+                        end
 					end
 				end
 
@@ -169,11 +194,13 @@ class UserZone
 
 				# Remove units from the attacker's attacking zones.
 				# -------------------------------------------------
+                # Xin: possible to have endless loops, should check the validity of rVal
 
 				aRemove	= aLoss
 				while aRemove > 0
 					for a in azones do
 						rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
+                        rVal = 1 if rVal <= 0        # added by Xin
 						aRemove 	-= rVal
 						a.soldiers 	-= rVal
 					end
@@ -212,7 +239,8 @@ class UserZone
 			# Return a successful (no exceptions) attack.
 			# -------------------------------------------
 
-			return { :result => results[:result], :time => Time.now, :czones => alteredzones }
+			return { :result => results[:result], :time => Time.now, :czones => alteredzones,
+					 :auser => auser, :duser => duser }
 
 		end
 
@@ -319,7 +347,7 @@ class UserZone
 			# Return a successful expansion.
 			# ------------------------------
 
-			return { :czones => affectedzones, :time => Time.now }
+			return { :czones => affectedzones, :time => Time.now, :user => user }
 
 		end
 
@@ -344,7 +372,11 @@ class UserZone
     		return :not_enough_turns 	if user.peek_current_turn_count() < 1
     		nscount             		= GameRules::get_soldier_train_count( user.total_soldiers, 1 )    	# Grab the amount of soldiers that will be trained.
     		user.total_soldiers 		+= nscount                                                                	# Increase this amount of soldiers.
-			z.soldiers 					+= nscount
+			if z.soldiers
+                z.soldiers 					+= nscount
+            else
+                z.soldiers = nscount
+            end   
 			user.spend_turns( 1 )
 
 			begin
@@ -361,7 +393,8 @@ class UserZone
 
     		return { :czone => z,						:time => Time.now,
 					 :trained => nscount, 				:newcountatzone => z.soldiers,
-					 :newtotal => user.total_soldiers, 	:nextup => GameRules::get_soldier_train_count( user.total_soldiers, 1 ) }
+					 :newtotal => user.total_soldiers, 	:nextup => GameRules::get_soldier_train_count( user.total_soldiers, 1 ),
+					 :user => user }
 
         end
 
@@ -432,7 +465,7 @@ class UserZone
 			# Done!
 			# =====
 
-			return { :time => Time.now, :czones => [ zoneSource, zoneTarget ] }
+			return { :time => Time.now, :czones => [ zoneSource, zoneTarget ], :user => user }
 			
 		end
 
@@ -492,7 +525,7 @@ class UserZone
 			# Done!
 			# =====
 
-			return { :time => Time.now, :czones => [ zoneSource, zoneTarget ] }
+			return { :time => Time.now, :czones => [ zoneSource, zoneTarget ], :user => user }
 			
 		end
 
@@ -538,7 +571,7 @@ class UserZone
 			# Done!
 			# =====
 
-			return { :time => Time.now, :czones => [ targetZone ] }
+			return { :time => Time.now, :czones => [ targetZone ], :user => user }
 
 		end
 
@@ -584,7 +617,7 @@ class UserZone
 			# Done!
 			# =====
 
-			return { :time => Time.now, :czones => [ targetZone ] }
+			return { :time => Time.now, :czones => [ targetZone ], :user => user }
 
 		end
 
@@ -613,6 +646,52 @@ class UserZone
 			end
 
 			return GameRules::game_zone_attack_cost( asoldiercount, dsoldiercount )
+
+		end
+
+	    ## @result		true
+		##				:user_auth_error
+		##				:database_error
+		##				:zone_not_owned
+		##				:already_jtower
+		##				:insufficient_turns
+		def self.build_jamming_tower( userid, targetX, targetY )
+
+			# Make sure the user has enough turns
+			# ===================================
+
+			user = User.find_by_id( userid )
+			return :user_auth_error		if user.nil?
+			return :insufficient_turns	if user.peek_current_turn_count() < GameRules::COST_JAMMING_TOWER
+
+			# Make sure the zone is owned by the player.
+			# ==========================================
+
+			targetZone = Zone.get_zone_at( targetX, targetY )
+			return :zone_not_owned		if targetZone.nil?
+			return :zone_not_owned		if targetZone.user_id != userid
+			return :already_jtower		if targetZone.jamming == true
+
+			# Do it!
+			# ======
+
+			targetZone.jamming = true
+			user.jammingcount += 1
+			user.spend_turns( GameRules::COST_JAMMING_TOWER )
+
+			begin
+				User.transaction do
+					user.save()
+					targetZone.save()
+				end
+			rescue
+				return :database_error
+			end
+
+			# Done!
+			# =====
+
+			return { :time => Time.now, :czones => [ targetZone ], :user => user }
 
 		end
 

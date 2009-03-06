@@ -73,6 +73,13 @@ class UserTest < ActiveSupport::TestCase
         assert dave.new_total_soldiers_after_battle
     end
 
+    test "update total soldiers if not compatible" do
+        dave = users(:dave)
+        dave.total_soldiers = 5
+        dave.valid?
+        assert_equal Zone.sum('soldiers', :conditions => "user_id=#{dave.id}"), dave.total_soldiers
+    end
+
     test "cannot set turn count to less than zero" do
         d = users(:dave)
         d.turns = -1

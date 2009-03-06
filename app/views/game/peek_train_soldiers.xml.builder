@@ -3,7 +3,7 @@ if @result.is_a?(Numeric)
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "peek_train_soldiers" ) do
 		xml.soldiers( "count" => @result )
 	end
 

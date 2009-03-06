@@ -45,15 +45,11 @@ class GameController < ApplicationController
 	##				:same_user					<- Attempting to attack self.
 	##				:not_enough_soldiers		<- Attacker doesn't have enough soldiers.	
 	def attack_zone
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
-			@result = :invalid_params
-		else
-			begin
-				@result = UserZone.attack_zone( session[:user_id], params[:targetX].to_i, params[:targetY].to_i )
-				@userid = session[:user_id]
-			rescue
-				@result = :database_error
-			end
+		begin
+			@result = UserZone.attack_zone( session[:user_id], params[:targetX].to_i, params[:targetY].to_i )
+			@userid = session[:user_id]
+		rescue
+			@result = :database_error
 		end
 
 		respond_to do |format|
@@ -379,7 +375,7 @@ class GameController < ApplicationController
 				else
 					user.change_viewport( params[:x], params[:y] )
 					user.save()
-					@result = true
+					@result = { :result => true, :user => user }
 				end
 			rescue
 				@result = :database_error
@@ -430,4 +426,73 @@ class GameController < ApplicationController
 			format.xml { render :layout => false }
 		end
 	end
+
+	## Build a jamming tower at the given zone.
+	## Parameters
+	## 		:targetX, :targetY
+	## Return values:
+	## @result		hash with :czones and :time
+	##				:user_auth_error
+	##				:database_error
+	##				:invalid_parameters
+	##				:zone_not_owned
+	##				:already_jtower
+	##				:insufficient_turns
+	def build_jamming_tower
+		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+			@result = :invalid_parameters
+		else
+			begin
+				@result = UserZone.build_jamming_tower( session[:user_id], params[:targetX], params[:targetY] )
+			rescue
+				@result = :database_error
+			end
+		end
+
+		respond_to do |format|
+			format.xml { render :layout => false }
+		end
+	end
+
+	## Parameters:
+	##		:targetX, :targetY
+	## Return values:
+	## @result		Hash with :nextsoldier, :artillery, :bunker, :jamming, :attackcost, :expandcost, :ctime
+	## 				:invalid_parameters
+	##				:user_auth_error
+	##				:database_error
+	def get_costs_at_location
+		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+			@result = :invalid_parameters
+		elsif User.find_by_id( session[:user_id] ) == nil
+			@result = :user_auth_error
+		else
+			begin
+				@result = {}
+
+				tZone = Zone.get_zone_at( params[:targetX], params[:targetY] )
+				#if tZone == nil
+				@result[:expandcost] = GameRules::TURNS_CONSUMED_PER_EXPAND
+				if tZone.user_id != session[:user_id]
+					retval = UserZone.get_attack_cost( session[:user_id], params[:targetX], params[:targetY] )
+					if retval.class != Symbol
+						@result[:attackcost] = retval	
+					end
+				end
+
+				@result[:bunker] 		= GameRules::COST_BUNKER
+				@result[:artillery]		= GameRules::COST_ARTILLERY
+				@result[:jamming] 		= GameRules::COST_JAMMING_TOWER
+				@result[:nextsoldier]	= UserZone.peek_soldier_train_results( session[:user_id], 1 )
+				@result[:ctime]			= Time.now
+			rescue
+				@result = :database_error
+			end
+		end
+
+		respond_to do |format|
+			format.xml { render :layout => false }
+		end				
+	end
+
 end

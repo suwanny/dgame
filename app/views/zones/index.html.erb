@@ -88,9 +88,15 @@
                ypos = (zone.y - @y_min) * (@grid_w + 1) + 1
                bg_str = "#" + get_color_hex(zone.user_id)
     %>
-            <div style="position:absolute; z-index:0;
+            <div align="center" style="position:absolute; z-index:0;
                         top:<%= ypos %>px; left:<%= xpos %>px; width:<%= zonew %>px; height:<%= zoneh %>px;
                         background:<%= bg_str %>">
+                <% if @user and zone.user_id == @user.id %>
+                <%=link_to zone.soldiers.to_s, :controller => 'game', :action => "train_soldiers",
+                        :targetX => zone.x, :targetY => zone.y%>
+                <% else %>
+                <%=zone.soldiers%>
+                <% end %>
             </div>
         <%
            end

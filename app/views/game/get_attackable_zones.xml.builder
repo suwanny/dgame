@@ -3,7 +3,7 @@ if @result.type == Array
 	# Return success XML.
 	# ===================
 
-	xml.status( "code" => 0 ) do
+	xml.status( "code" => 0, "controller_called" => "get_attackable_zones" ) do
 		for z in @result
 			xml.zone( "x" => z.x, "y" => z.y  )
 		end
