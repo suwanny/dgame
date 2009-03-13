@@ -1,4 +1,4 @@
-if @result.type == Zone.type
+if @result.class != Symbol
 
 	# Return success XML.
 	# ===================

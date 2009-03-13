@@ -1,4 +1,4 @@
-if @result != nil
+if @result.class != Symbol
 
 	# Return success XML.
 	# ===================

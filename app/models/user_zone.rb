@@ -608,7 +608,7 @@ class UserZone
 			begin
 				User.transaction do
 					user.save()
-					targetZone.save()
+					targetZone.save() 
 				end
 			rescue
 				return :database_error
@@ -630,7 +630,7 @@ class UserZone
 			# ===========================================
 
 			dzone = Zone.get_zone_at( targetX, targetY )
-			return :invalid_target if dzone.is_nil?
+			return :invalid_target if dzone == nil
 			return :invalid_target if dzone.user_id == userid
 
 			#dzones = Zone.get_zones_by_user_in_area( dzone.user_id, targetX-1, targetX+1, targetY-1, targetY+1 )

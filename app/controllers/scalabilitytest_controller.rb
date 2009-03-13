@@ -47,6 +47,18 @@ class ScalabilitytestController < ApplicationController
         end
     end
 
+    ## execute this script by using the url "http://URL/scalabilitytest/random_view"
+    def random_view
+        xpos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTX).to_i
+        ypos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTY).to_i
+
+        zonedata = Zone.find_zones_in_view_xml(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H)
+        respond_to do |format|
+            format.xml { render :xml => zonedata}
+        end
+        #    redirect_to( :controller => "users", :action => "index" )
+    end
+
     ## execute this script by using the url "http://URL/scalabilitytest/random_operation"
     def random_operation
         @user = User.find_by_id( session[:user_id] )

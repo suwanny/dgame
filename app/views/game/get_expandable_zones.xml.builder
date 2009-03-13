@@ -1,4 +1,4 @@
-if @error.nil?
+if @error == nil
 
 	# Return success XML.
 	# ===================

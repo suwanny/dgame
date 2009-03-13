@@ -73,7 +73,9 @@ class Zone < ActiveRecord::Base
 
         uzones = get_zones_by_user( user_id )
         for z in uzones
-            grid[ z.x - base_x ][ z.y - base_y ] = true
+            if grid[ z.x - base_x ] and grid[z.x - base_x][ z.y - base_y ]
+                grid[ z.x - base_x ][ z.y - base_y ] = true
+            end   
         end
 
         # Get all zones in the area not owned by the given user. If any such zone is adjacent

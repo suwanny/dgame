@@ -45,11 +45,18 @@ class GameController < ApplicationController
 	##				:same_user					<- Attempting to attack self.
 	##				:not_enough_soldiers		<- Attacker doesn't have enough soldiers.	
 	def attack_zone
-		begin
-			@result = UserZone.attack_zone( session[:user_id], params[:targetX].to_i, params[:targetY].to_i )
-			@userid = session[:user_id]
-		rescue
-			@result = :database_error
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
+			@result = :invalid_params
+		else
+			begin
+				@result = UserZone.attack_zone( session[:user_id], targetX, targetY )
+				@userid = session[:user_id]
+			rescue
+				@result = :database_error
+			end
 		end
 
 		respond_to do |format|
@@ -75,7 +82,19 @@ class GameController < ApplicationController
 	## 				:database_error				<- Database error!
 	##              :not_enough_soldiers		<- Not enough adjacent soldiers to take the zone.
 	def expand_into_zone
-		@result = UserZone.expand_into_zone( session[:user_id], params[:targetX].to_i, params[:targetY].to_i )
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
+			@result = :invalid_params
+		else
+			begin
+				@result = UserZone.expand_into_zone( session[:user_id], targetX, targetY )
+			rescue
+				@result = :database_error
+			end
+		end
+
 		respond_to do |format|
 			format.html do
                 if (@result == true)
@@ -99,19 +118,17 @@ class GameController < ApplicationController
 	##				:database_error
 	## 				Array of Zone objects!
 	def get_zone_data
+		minX = Float(params[:min_x]).to_i rescue false
+		maxX = Float(params[:max_x]).to_i rescue false
+		minY = Float(params[:min_y]).to_i rescue false
+		maxY = Float(params[:max_y]).to_i rescue false
 
-		# Make sure the parameters are valid!
-		# -----------------------------------
-
-		if !params[:min_x].is_a?(Numeric) || !params[:max_x].is_a?(Numeric) || !params[:min_y].is_a?(Numeric) || !params[:max_y].is_a?(Numeric)
+		if !minX.is_a?(Numeric) || !maxX.is_a?(Numeric) || !minY.is_a?(Numeric) || !maxY.is_a?(Numeric)
 			@result = :invalid_params
 		else
 			begin
-				# Get the zones!
-				# --------------
-
 				@userid = session[:user_id]
-				@result = Zone.find_zones_in_view_xml( params[:min_x], params[:max_x], params[:min_y], params[:max_y] )
+				@result = Zone.find_zones_in_view_xml( minX, maxX, minY, maxY )
 			rescue
 				@result = :database_error
 			end
@@ -164,16 +181,18 @@ class GameController < ApplicationController
 	##				:no_such_zone 				<- If the zone doesn't belong to anyone
 	##				:user_zone_mismatch			<- Zone isn't owned by the given player.
 	def train_soldiers
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
 
-		#if params[:targetX].is_a?(Numeric) || params[:targetY].is_a?(Numeric)
-		#	@result = :invalid_parameter
-		#else
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
+			@result = :invalid_parameter
+		else
 			begin
-				@result = UserZone.train_soldiers( session[:user_id], params[:targetX], params[:targetY] )
+				@result = UserZone.train_soldiers( session[:user_id], targetX, targetY )
 			rescue
 				@result = :database_error
 			end
-		#end
+		end
 		
 		respond_to do |format|
 			format.html do
@@ -197,12 +216,15 @@ class GameController < ApplicationController
 	##				:database_error
 	## 				Zone object in @result, user_id or nil in @userid!
 	def get_single_zone_info
-    	if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+    	targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_params
 		else
 			begin
 				@userid = session[:user_id]
-				@result = Zone.get_zone_at( params[:targetX], params[:targetY] )
+				@result = Zone.get_zone_at( targetX, targetY )
 			rescue
 				@result = :database_error
 			end
@@ -228,12 +250,18 @@ class GameController < ApplicationController
 	##				:invalid_parameters
 	##				:not_enough_turns
 	def move_soldiers
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric) ||
-		   !params[:sourceX].is_a?(Numeric) || !params[:sourceY].is_a?(Numeric) || !params[:count].is_a?(Numeric)	
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+		sourceX = Float(params[:sourceX]).to_i rescue false
+		sourceY = Float(params[:sourceY]).to_i rescue false
+		sCount	= Float(params[:count]  ).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
+		   !sourceX.is_a?(Numeric) || !sourceY.is_a?(Numeric) || !sCount.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
-				@result = UserZone.move_soldiers( session[:user_id], params[:targetX], params[:targetY], params[:sourceX], params[:sourceY], params[:count] )
+				@result = UserZone.move_soldiers( session[:user_id], targetX, targetY, sourceX, sourceY, sCount )
 			rescue
 				@result = :database_error
 			end
@@ -263,12 +291,17 @@ class GameController < ApplicationController
 	##				:invalid_parameters
 	##				:not_enough_turns
 	def move_artillery
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric) ||
-		   !params[:sourceX].is_a?(Numeric) || !params[:sourceY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+		sourceX = Float(params[:sourceX]).to_i rescue false
+		sourceY = Float(params[:sourceY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
+		   !sourceX.is_a?(Numeric) || !sourceY.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
-				@result = UserZone.move_artillery( session[:user_id], params[:targetX], params[:targetY], params[:sourceX], params[:sourceY] )
+				@result = UserZone.move_artillery( session[:user_id], targetX, targetY, sourceX, sourceY )
 			rescue
 				@result = :database_error
 			end
@@ -291,11 +324,14 @@ class GameController < ApplicationController
 	##				:already_artillery
 	##				:insufficient_turns
 	def build_artillery
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
-				@result = UserZone.build_artillery( session[:user_id], params[:targetX], params[:targetY] )
+				@result = UserZone.build_artillery( session[:user_id], targetX, targetY )
 			rescue
 				@result = :database_error
 			end
@@ -318,11 +354,14 @@ class GameController < ApplicationController
 	##				:already_bunker
 	##				:insufficient_turns
 	def build_bunker
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
-				@result = UserZone.build_bunker( session[:user_id], params[:targetX], params[:targetY] )
+				@result = UserZone.build_bunker( session[:user_id], targetX, targetY )
 			rescue
 				@result = :database_error
 			end
@@ -341,14 +380,20 @@ class GameController < ApplicationController
 	##		:invalid_param
 	##		:no_user
 	def get_user_info
-		if !params[:userid].is_nil? && !params[:userid].is_a?(Numeric)
+		if params[:userid] == nil
+			@userid = session[:user_id]
+		else
+			@userid = Float(params[:userid]).to_i rescue false
+		end
+
+		if !@userid.is_a?(Numeric)
 			@result = :invalid_param
 		else
-			@userid = params[:userid]
-			@result = User.find_by_id( @userid )
+			@result = User.find_by_id( @userid )			
 			if @result == nil
 				@result = :no_user
 			end
+			@userid = session[:user_id]
 		end
 
 		respond_to do |format|
@@ -365,15 +410,18 @@ class GameController < ApplicationController
 	##				:invalid_parameters
 	##				:database_error
 	def set_viewport_data
-		if !params[:x].is_a?(Numeric) || !params[:y].is_a?(Numeric)
+		targetX = Float(params[:targetX]) rescue false
+		targetY = Float(params[:targetY]) rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
 				user = User.find_by_id( session[:user_id] )
-				if user.is_nil?
+				if user == nil
 					@result = :user_auth_error
 				else
-					user.change_viewport( params[:x], params[:y] )
+					user.change_viewport( targetX, targetY )
 					user.save()
 					@result = { :result => true, :user => user }
 				end
@@ -398,11 +446,14 @@ class GameController < ApplicationController
 	##				:invalid_target
 	##				:cant_attack_zone
 	def get_attack_cost
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_params
 		else
 			begin
-				@result = UserZone.get_attack_cost( session[:user_id], params[:targetX], params[:targetY] )
+				@result = UserZone.get_attack_cost( session[:user_id], targetX, targetY )
 			rescue
 				@result = :database_error
 			end
@@ -416,7 +467,10 @@ class GameController < ApplicationController
 	## @result		amount of turns as an integer
 	##				:invalid_params
 	def get_expand_cost
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_params
 		else
 			@result = GameRules::TURNS_CONSUMED_PER_EXPAND
@@ -439,11 +493,14 @@ class GameController < ApplicationController
 	##				:already_jtower
 	##				:insufficient_turns
 	def build_jamming_tower
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_parameters
 		else
 			begin
-				@result = UserZone.build_jamming_tower( session[:user_id], params[:targetX], params[:targetY] )
+				@result = UserZone.build_jamming_tower( session[:user_id], targetX, targetY )
 			rescue
 				@result = :database_error
 			end
@@ -462,7 +519,10 @@ class GameController < ApplicationController
 	##				:user_auth_error
 	##				:database_error
 	def get_costs_at_location
-		if !params[:targetX].is_a?(Numeric) || !params[:targetY].is_a?(Numeric)
+		targetX = Float(params[:targetX]).to_i rescue false
+		targetY = Float(params[:targetY]).to_i rescue false
+
+		if !targetX.is_a?(Numeric) || !targetY.is_a?(Numeric)
 			@result = :invalid_parameters
 		elsif User.find_by_id( session[:user_id] ) == nil
 			@result = :user_auth_error
@@ -470,11 +530,11 @@ class GameController < ApplicationController
 			begin
 				@result = {}
 
-				tZone = Zone.get_zone_at( params[:targetX], params[:targetY] )
+				tZone = Zone.get_zone_at( targetX, targetY )
 				#if tZone == nil
 				@result[:expandcost] = GameRules::TURNS_CONSUMED_PER_EXPAND
 				if tZone.user_id != session[:user_id]
-					retval = UserZone.get_attack_cost( session[:user_id], params[:targetX], params[:targetY] )
+					retval = UserZone.get_attack_cost( session[:user_id], targetX, targetY )
 					if retval.class != Symbol
 						@result[:attackcost] = retval	
 					end

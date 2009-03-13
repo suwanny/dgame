@@ -11,6 +11,8 @@ class ScalabilityTest
     TEST_NEWUSER_SPANX = 10
     TEST_NEWUSER_SPANY = 10
     TEST_NEWUSER_PASSWORD = "a"
+    VIEW_W = 20
+    VIEW_H = 20      
 
     ## methods
     public
@@ -78,8 +80,18 @@ class ScalabilityTest
             return false
         end
 
-        zones_attack = Zone.get_attackable_zones(user_id) if mode != :MODE_EXPAND
-        zones_expand = Zone.get_expandable_zones(user_id) if mode != :MODE_ATTACK
+        newest_zone = Zone.find( :first, :conditions => {:user_id => user_id}, :order => "updated_at DESC")
+        if newest_zone == nil
+            return false
+        end
+
+        #i = user.name[1..(user.name.length - 1)].to_i
+        x1 = newest_zone.x
+        y1 = newest_zone.y
+
+        # so the get_attackable_zones and the get_expandable_zones needs to be optimized
+        zones_attack = Zone.get_attackable_zones_in_view(user_id, x1 - VIEW_W / 2, x1 + VIEW_W / 2, y1 - VIEW_H / 2, y1 + VIEW_H / 2) if mode != :MODE_EXPAND
+        zones_expand = Zone.get_expandable_zones_in_view(user_id, x1 - VIEW_W / 2, x1 + VIEW_W / 2, y1 - VIEW_H / 2, y1 + VIEW_H / 2) if mode != :MODE_ATTACK
 
         count_attack = (zones_attack) ? zones_attack.size() : 0
         count_expand = (zones_expand) ? zones_expand.size() : 0

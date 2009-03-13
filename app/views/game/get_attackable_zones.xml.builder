@@ -1,4 +1,4 @@
-if @result.type == Array
+if @result.class == Array
 
 	# Return success XML.
 	# ===================
