@@ -1,5 +1,5 @@
 class GameController < ApplicationController
-    USE_MEMCACHED      = true # indicate whether to use the memcached or not
+    USE_MEMCACHED      = false # indicate whether to use the memcached or not
 
   # Methods for Pages
   # =================
