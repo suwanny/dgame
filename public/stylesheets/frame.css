@@ -1,0 +1,52 @@
+
+#button_world {
+background-image : url(/images/buttons_world.gif);
+}
+
+#button_world:hover {
+background-image : url(/images/buttons_world_h.gif);
+}
+
+#button_profile {
+background-image : url(/images/buttons_profile.gif);
+}
+
+#button_profile:hover {
+background-image : url(/images/buttons_profile_h.gif);
+}
+
+#button_ranking {
+background-image : url(/images/buttons_ranking.gif);
+}
+
+#button_ranking:hover {
+background-image : url(/images/buttons_ranking_h.gif);
+}
+
+#button_exit {
+background-image : url(/images/buttons_exit.gif);
+}
+
+#button_exit:hover {
+background-image : url(/images/buttons_exit_h.gif);
+}
+
+#button_signin {
+background-image : url(/images/buttons_signin.gif);
+}
+
+#button_signin:hover {
+background-image : url(/images/buttons_signin_h.gif);
+}
+
+.cell_lightest {
+background-color: #002f3b
+}
+
+.cell_midcolor {
+background-color: #001f23
+}
+
+.cell_darkest {
+background-color: #00171d
+}
