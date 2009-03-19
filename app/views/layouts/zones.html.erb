@@ -1,45 +1,65 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-  <title>GameStates: <%= controller.action_name %></title>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+  <title>Users: <%= controller.action_name %></title>
   <%= stylesheet_link_tag 'scaffold', 'dgame' %>
+    <%= stylesheet_link_tag 'frame', 'dgame' %>
   <link rel="shortcut icon" href="/images/dg_logo.gif">
+
+    <script language="JavaScript">
+    <!--
+    function MM_reloadPage(init) {  //reloads the window if Nav4 resized
+      if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+        document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+      else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+    }
+    MM_reloadPage(true);
+// -->
+    </script>
+
 </head>
 <body>
 
-<div id="banner">
   <table width=95% height=50>
-    <tr>
+    <tr height="20"></tr>
+    <tr height="35">
       <td width=50% align=center>
-        <span style="font-size: x-large; ">DGame (Distributed Game) </span><br>
-        <br>
-        <span style="font-size: medium; ">CS290F Project   </span>
+        <img src="/images/title.gif">
+      </td>
+      <td>
 
       </td>
       <td align=right>
+        <table height="35" align=center cellpadding=0 cellspacing=0><tr height="35">
         <% if session[:user_id] %>
-          <%= link_to 'Game',    :controller => 'users', :action => "game"  %>
-          <%= link_to 'StatesWar',    :controller => 'stateswar', :action => "index"  %>
-          <%= link_to 'Gameboard',    :controller => 'zones' %>
-          <%= link_to 'Ranking',    :controller => 'users', :action => "ranking"  %>
-          <%= link_to 'Profile',    :controller => 'users', :action => "info" %>
-          <%= link_to "LogOut", :controller => 'users', :action => "logout" %>
+            <td width="82" valign="middle" align="center" id="button_world">
+                <a href="/zones/"><img src="/images/spacer.gif" border=0 width=82 height=35></a>
+            </td><td width="8"></td>
+            <td width="82" valign="middle" align="center" id="button_ranking">
+                <a href="/users/ranking"><img src="/images/spacer.gif" border=0 width=82 height=35></a>
+            </td><td width="8"></td>
+            <td width="82" valign="middle" align="center" id="button_profile">
+                <a href="/users/info"><img src="/images/spacer.gif" border=0 width=82 height=35></a>
+            </td><td width="8"></td>
+            <td width="82" valign="middle" align="center" id="button_exit">
+                <a href="/users/logout"><img src="/images/spacer.gif" border=0 width=82 height=35></a>
+            </td>
         <% else %>
-          <%= link_to "LogIn", :controller => 'users', :action => "index" %>
+            <td width="82" valign="middle" align="center" id="button_signin">
+                <a href="/users/"><img src="/images/spacer.gif" border=0 width=82 height=35></a>
+            </td><td width="8"></td>
         <% end %>
-        <p style="color: blue"><%= flash[:notice] %></p>
+        </tr></table>
       </td>
     </tr>
   </table>
 
-</div>
+  <p align="center" style="color: BLACK"><%= flash[:notice] %></p>
 
-
-
-<%= yield  %>
+<%= yield %>
 
 </body>
 </html>

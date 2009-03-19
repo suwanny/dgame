@@ -1,18 +1,38 @@
-<div style="text-align: left;">
+<div align="center">
   <h1>Personal Information</h1>
+<table border="0" cellspacing="2" cellpadding="3" bordercolor="#000066">
+    <tr>
+        <td class="cell_lightest" width="120">Name:</td>
+        <td class="cell_darkest" width="190"><%= h @user.name %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Turns:</td>
+        <td class="cell_darkest"><%= h @user.turns %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Total Zones:</td>
+        <td class="cell_darkest"><%= h @user.total_zones %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Soldiers:</td>
+        <td class="cell_darkest"><%= h @user.total_soldiers %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Alliance:</td>
+        <td class="cell_darkest"><%= h UsersHelper.getAllianceStr(@user.alliance) %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">View port:</td>
+        <td class="cell_darkest"><%= h @user.viewport_x %>, <%= h @user.viewport_y %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Last time sign in:</td>
+        <td class="cell_darkest"><%= h @user.last_time_login %></td>
+    </tr>
+    <tr>
+        <td class="cell_lightest">Last time gained turns:</td>
+        <td class="cell_darkest"><%= h @user.last_time_turns_commit %></td>
+    </tr>
+ </table>
 
-  <p>
-    <b>Name: </b><%= h @user.name %><br/>
-    <b>Turns: </b><%= h @user.turns %><br/>
-    <b>Total Zones: </b><%= h @user.total_zones %><br/>
-    <b>Soldiers: </b><%= h @user.total_soldiers %><br/>
-    <b>Average Soldiers per Zone: </b><%= h ("%.03f" % (@user.avg_soldiers_per_zone)).to_f %><br/>
-    <b>Alliance: </b><%= h UsersHelper.getAllianceStr(@user.alliance) %><br/>
-    <b>View port: </b><%= h @user.viewport_x %>, <%= h @user.viewport_y %><br/>
-      <b>Last time you gain your turns: </b><%=h @user.last_time_turns_commit %><br/>
-      <b>Last time you login: </b><%=h @user.last_time_login %><br/>
-  </p>
-
-  <br>
-  <%= link_to 'Gameboard',    :controller => 'zones' %>
 </div>

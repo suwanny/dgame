@@ -11,7 +11,7 @@ class GameRules
 	MAX_TURN_STORAGE				= 250    						# The number of turns a user can save up.
 	MAX_TURNS_GAINED_PER_LOGIN		= 5000    						# (Deprecated)
 	DEFAULT_STARTING_SOLDIER		= 50
-	DEFAULT_STARTING_TURNS			= 50
+	DEFAULT_STARTING_TURNS			= 50 
 	TURNS_CONSUMED_PER_ATTACK		= 20     						# The number of turns used to attack a zone (win or lose)
 	TURNS_CONSUMED_PER_EXPAND		= 5     						# The number of turns used to expand a zone
 	TURNS_CONSUMED_PER_MOV			= 10     						# The number of turns used to perform a move
@@ -32,6 +32,7 @@ class GameRules
 	COST_JAMMING_TOWER				= 250
 	COST_MOVE_SOLDIERS				= 1
 	COST_MOVE_ARTILLERY				= 1
+	TIMEOUT_P2P_ID					= 900							# In seconds.
 
   	ZONE_EXPANDABLE_AREA_OFFSETS	= [ [0, 1], [0, -1], [1, 0], [-1, 0] ]
 
@@ -39,6 +40,10 @@ public
 
 	# Functions
 	# =========
+
+	def self.get_max_zones_on_land
+		return ( ( ZONE_COUNT_X * ZONE_COUNT_Y ).to_f * 0.292 ).to_i
+	end
 
 	def self.game_zone_explore_cost( userobj, x, y )
 		return [ 1, TURNS_CONSUMED_PER_EXPAND ].max
@@ -147,7 +152,7 @@ public
 			fleeCount				= ( dSoldiers * ATTACK_MAX_UNIT_FLEE_PERCENT * rand() ).floor
 			artilleryGet  			= rand() < ATTACK_ARTILLERY_HIJACK_PERCENT if defending_zone.artillery == true
 			aLPerc					= rand() * ATTACK_MAX_UNIT_LOSS_PERCENT
-			aLoss					= [ [0, aLPerc * aSoldiers].max, aSoldiers-attacking_zones.size() ].min
+			aLoss					= [ [0, aLPerc * aSoldiers].max.floor, aSoldiers-attacking_zones.size()-1 ].min # -1 since there needs to be 1 that moves into the zone.
 
 			# Set the Results.
 			# ================
@@ -167,8 +172,8 @@ public
 			aLPerc  				= rand() * ATTACK_MAX_UNIT_LOSS_PERCENT     	# Percent modifier that the attacker will lose from the attack: Basically 30% * rand(0 to 1)
 			dLPerc  				= rand() * aLPerc                 				# Percent modifier that the defender will lose from the attack: The one from before * rand(0 to 1)
 
-            aLoss 					= [ [0, aLPerc * aSoldiers].max, aSoldiers-attacking_zones.size() ].min
-            dLoss 					= [ [0, dLPerc * dSoldiers].max, dSoldiers-1 ].min
+            aLoss 					= [ [0, aLPerc * aSoldiers].max.floor, aSoldiers-attacking_zones.size() ].min
+            dLoss 					= [ [0, dLPerc * dSoldiers].max.floor, dSoldiers-1 ].min
 
 			# Set the results.
 			# ================

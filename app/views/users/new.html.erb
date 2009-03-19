@@ -11,10 +11,20 @@
 			<%= f.label :name %><br />
 			<%= f.text_field :name, :size => 40 %>
 		</div>
-    <div>
-      <%= f.label :alliance %>
-      <%= select :alliance, "", @Alliances, :selected => @Alliances[random_alliance] %>
-    </div>
+		<div>
+		  <%= f.label :alliance %>
+		  <%= select :alliance, "", @Alliances, :selected => @Alliances[random_alliance] %>
+		</div>
+		<div>
+			<%= f.label :color, "Color (RGB)" %><br />
+			<%= f.text_field :color_r, :size => 10 %>
+			<%= f.text_field :color_g, :size => 10 %>
+			<%= f.text_field :color_b, :size => 10 %>
+		</div>
+		<div>
+			<%= f.label :email %><br />
+			<%= f.text_field :email, :size => 40 %>
+		</div>
 		<div>
 			<%= f.label :user_password, "Password" %><br />
 			<%= f.password_field :password, :size => 40 %>

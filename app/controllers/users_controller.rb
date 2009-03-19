@@ -52,29 +52,29 @@ class UsersController < ApplicationController
         if request.post?
             redirect_to( :action => "new" ) if not params[:user]
 
-            @user         = User.new( params[:user] )
-            @user.total_soldiers= GameRules::DEFAULT_STARTING_SOLDIER
-            @user.total_zones=0
-            @user.turns      = GameRules::DEFAULT_STARTING_TURNS
+            @user        					= User.new( params[:user] )
+            @user.total_soldiers			= 0
+            @user.total_zones				= 0
+            @user.turns      				= GameRules::DEFAULT_STARTING_TURNS
+            @user.alliance 					= UsersHelper.getAllianceId(params[:alliance]) 	# StatesGame
+            @user.viewport_x     			= 2000
+            @user.viewport_y     			= 2000
+            @user.last_time_login 			= Time.now
+            @user.last_time_turns_commit 	= Time.now
+			@user.jammingcount				= 0
+			@user.score						= 0
 
-            @user.alliance = UsersHelper.getAllianceId(params[:alliance]) # StatesGame
-
-            #view port starts from (0,0)
-            @user.viewport_x     = 0
-            @user.viewport_y     = 0
-            @user.last_time_login = Time.now
-            @user.last_time_turns_commit = Time.now
-
-            #more operations on the default values
+            # More operations on the default values
+			# =====================================
 
             if @user.save
-                session[:user_id]  = @user.id
-                session[:user_name] = @user.name
+                session[:user_id]  			= @user.id
+                session[:user_name] 		= @user.name
 
                 # StatesGame - start
-                session[:alliance] = @user.alliance
-                @user.total_zones = State.count_by_sql "SELECT COUNT(*) FROM states WHERE alliance=#{session[:alliance]}"
-                session[:zones] = @user.total_zones
+                session[:alliance] 			= @user.alliance
+                #@user.total_zones 			= State.count_by_sql "SELECT COUNT(*) FROM states WHERE alliance=#{session[:alliance]}"
+                session[:zones] 			= @user.total_zones
                 # StatesGame - end
 
                 redirect_to( :action => "info" )

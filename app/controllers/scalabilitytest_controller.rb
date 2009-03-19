@@ -1,5 +1,6 @@
-## This controller includes all the methods for the scalability tests
+require 'memcache_util.rb'
 
+## This controller includes all the methods for the scalability tests
 class ScalabilitytestController < ApplicationController
     ## execute this script by using the url "http://URL/scalabilitytest/add_new_users"
     def add_new_users
@@ -49,12 +50,35 @@ class ScalabilitytestController < ApplicationController
 
     ## execute this script by using the url "http://URL/scalabilitytest/random_view"
     def random_view
-        xpos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTX).to_i
-        ypos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTY).to_i
-
-        zonedata = Zone.find_zones_in_view_xml(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H)
+        if GameController::USE_MEMCACHED
+            xprev = Cache.get("scalability_test_random_view_x")
+            yprev = Cache.get("scalability_test_random_view_y")
+            if (xprev != nil && yprev != nil)
+                xpos = xprev
+                ypos = yprev
+            else
+                xpos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTX).to_i
+                ypos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTY).to_i
+                Cache.put("scalability_test_random_view_x", xpos, 30)
+                Cache.put("scalability_test_random_view_y", ypos, 30)
+            end
+        else
+            xpos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTX).to_i
+            ypos = (rand() * 100 + ScalabilityTest::TEST_NEWUSER_STARTY).to_i
+        end
+        if GameController::USE_MEMCACHED
+            if Zone.MEMCACHED_ViewportSame(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H)    
+                @zonedata_str = Zone.MEMCACHED_LoadZoneXML
+            else
+                @zonedata = Zone.find_zones_in_view_xml(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H)
+                @zonedata_str = Zone.MEMCACHED_SaveZoneXML(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H, @zonedata)
+            end
+        else
+            @zonedata = Zone.find_zones_in_view_xml(xpos, xpos + ScalabilityTest::VIEW_W, ypos, ypos + ScalabilityTest::VIEW_H)
+        end
+        #cache will be effective for 30 seconds
         respond_to do |format|
-            format.xml { render :xml => zonedata}
+            format.xml { render :layout => false}
         end
         #    redirect_to( :controller => "users", :action => "index" )
     end
@@ -86,6 +110,20 @@ class ScalabilitytestController < ApplicationController
         end
     end
 
+    ## clear the cache
+    def clear_cache
+        Cache.flush_all
+        s = []
+        x1 = Cache.get("Effective_view_xmin")
+        x2 = Cache.get("Effective_view_xmax")
+        y1 = Cache.get("Effective_view_ymin")
+        y2 = Cache.get("Effective_view_ymax")
+        s = "Effective_view_xmin=" + x1.to_s + ", Effective_view_xmax=" + x2.to_s + ", Effective_view_ymin=" + y1.to_s + ", Effective_view_ymax=" + y2.to_s
+        respond_to do |format|
+            format.xml { render :xml => s}
+        end
+    end
+    
     ## execute this script by using the url "http://URL/scalabilitytest/create_10000_random_zone_records"
     def create_10000_random_zone_records()
         for time in (1..100)

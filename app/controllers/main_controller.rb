@@ -1,7 +1,11 @@
 class MainController < ApplicationController
 
 	def index
-        @user = User.find_by_id( session[:user_id] )
+        @user 			= User.find_by_id( session[:user_id] )
+		@playercount    = User.get_user_count;
+		@zonecount		= Zone.get_total_zone_count;
+		@maxzones		= GameRules::get_max_zones_on_land; 
+		@topusers		= User.get_top_five_users;
 	end
 
 	def login
@@ -30,7 +34,7 @@ class MainController < ApplicationController
 
             if @user.save
                 session[:user_id]  			= @user.id
-                redirect_to( :action => "index", :controller => "game" )
+                redirect_to( :action => "index" ) #, :controller => "game" )
             else
                 flash[:notice]    			= @user.errors.full_messages
             end
@@ -40,7 +44,15 @@ class MainController < ApplicationController
 	end
 
 	def logout
-		
+		if session[:user_id]
+            flash[:notice] 		= "Logged out."
+        end
+        session[:user_id] 		= nil
+        session[:user_name] 	= nil
+        session[:turns] 		= nil
+        session[:soldiers] 		= nil
+
+        redirect_to( :action => "index" )
 	end
 
 end

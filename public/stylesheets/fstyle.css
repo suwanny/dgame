@@ -1,0 +1,379 @@
+body
+{
+	background-color:	black;
+}
+
+a
+{
+	color:			rgb(100,100,255);
+	text-decoration:none;
+	
+}
+
+.everything
+{
+	position: 		relative;
+	top:    		0px;
+	bottom: 		0px;
+	right:  		0px;
+	margin: 		0px auto;
+	width:  		950px;
+	min-height:     100%;
+	text-align:     left;
+}
+
+.loginbox
+{
+	position:		absolute;
+	width:			300px;
+	float:			right;
+	top:			20px;
+	right:			20px;
+
+	font-family:	Verdana, Sans-serif;
+	font-size:		16px;
+	color:			white;
+
+}
+
+.loginbox .lboxtitle
+{
+	float:			right;
+	width:			100%;
+
+	text-align:		right;
+	padding-bottom:	9px;
+}
+
+.loginbox .labelbox
+{
+	float:			left;
+	width:			35%;
+}
+
+.loginbox .labelbox p
+{
+	padding-top:	3px;
+	padding-bottom:	6px;
+}
+
+.loginbox .inputbox
+{
+	float:			right;
+	width:			60%;
+ 
+	text-align:		right;
+}
+
+.loginbox .inputbox p
+{
+	padding-bottom:	3px;
+	text-align:		right;
+}
+
+.celogobox
+{
+	position:		absolute;
+	float:			left;
+	top:			20px;
+	left:			20px;
+}
+
+.userinfobox
+{
+	position:		absolute;
+	width:			400px;
+	float:			right;
+	top:			20px;
+	right:			20px;
+
+	font-family:	Verdana, Sans-serif;
+	font-size:		16px;
+	color:			white;
+}
+
+.userinfobox .linksbox
+{
+	float:			right;
+	width:			210px;
+	right:			0px;
+
+
+	font-size:		20px;
+}
+
+.userinfobox .statusbox
+{
+	float:			left;
+	width:			180px;
+	left:			0px;
+
+}
+.userinfobox .linksbox .gamelink
+{
+	float:			left;
+	left:			0px;
+	width:			45%;
+
+	text-align:		center;
+
+	padding-top:	4px;
+	padding-bottom:	4px;
+}
+
+.userinfobox .linksbox .profilelink
+{
+	float:			right;
+	right:			0px;
+	width:			45%;
+
+	text-align:		center;
+
+	padding-top:	4px;
+	padding-bottom:	4px;
+}
+
+.userinfobox .linksbox .rankinglink
+{
+	float:			left;
+	left:			0px;
+	width:			45%;
+
+	text-align:		center;
+
+	padding-top:	4px;
+	padding-bottom:	8px;
+}
+
+.userinfobox .linksbox .messageslink
+{
+	float:			right;
+	right:			0px;
+	width:			45%;
+
+	text-align:		center;
+	
+	padding-top:	4px;
+	padding-bottom:	8px;
+}
+
+.userinfobox .statusbox .statustitle
+{
+	float:			left;
+	width:			100%;
+	padding-bottom:	3px;
+}
+
+.userinfobox .statusbox .namebox
+{
+	float:			left;
+	text-align:		left;
+	width:			40%;
+	left:			0px;
+	padding-left:	5px;
+}
+
+.userinfobox .statusbox .logoutbox
+{
+	float:			right;
+	text-align:		right;
+	width:			40%;
+	right:			0px;
+	padding-right:	2px;
+}
+
+.userinfobox .statusbox .statsbox
+{
+	float:			left;
+	width:			170px;
+
+	border-style:	solid;
+	border-width:	1px;
+	border-color:	white;
+
+	padding:		5px;
+}
+
+.userinfobox .statusbox p
+{
+	padding-top:	2px;
+	padding-bottom:	2px;
+}
+
+.userinfobox .statusbox .labels
+{
+	float:			left;
+	text-align:		left;
+	width:			48%;
+	left:			0px;
+}
+
+.userinfobox .statusbox .values
+{
+	float:			right;
+	width:			48%;
+	right:			0px;
+}
+
+.userinfobox .statusbox .values p
+{                         	
+	text-align:		right;
+}
+
+.mainsidebar
+{
+	position:		absolute;
+	float:			left;
+	left:			30px;
+	top:			150px;
+	width:			150px;
+	padding:		10px;
+
+	font-family:	Verdana, Sans-serif;
+	font-size:		13px;
+	color:			white;
+
+	border-style:	solid;
+	border-width:	1px;
+	border-color:	white;
+}
+
+.mainsidebar p
+{
+	padding-top:	2px;
+	padding-bottom:	2px;
+}
+
+.maingamestatus
+{
+	position:		absolute;
+	float:			right;
+	right:			30px;
+	top:			150px;
+	width:			150px;
+	padding:		10px;
+
+	font-family:	Verdana, Sans-serif;
+	font-size:		13px;
+	color:			white;
+
+	border-style:	solid;
+	border-width:	1px;
+	border-color:	white;
+}
+
+.mainleaderboards
+{
+	position:		absolute;
+	float:			right;
+	right:			30px;
+	top:			250px;
+	width:			150px;
+	padding:		10px;
+
+	font-family:	Verdana, Sans-serif;
+	font-size:		13px;
+	color:			white;
+
+	border-style:	solid;
+	border-width:	1px;
+	border-color:	white;
+}
+
+.maingamestatus .title
+{
+	float:			left;
+	width:			100%;
+
+	font-size:		15px;
+	padding-bottom: 5px;
+}
+
+.maingamestatus .players
+{
+	float:			left;
+	width:			100%;
+}
+
+.maingamestatus .players .label
+{
+	float:			left;
+	width:			45%;
+	padding-left:	7px;
+}
+
+.maingamestatus .players .value
+{
+	float:			right;
+	width:			45%;
+	text-align:		right;
+}
+
+.maingamestatus .coverage
+{
+	float:			left;
+	width:			100%;
+	padding-top:	2px;
+	padding-bottom:	2px;
+}
+
+.maingamestatus .coverage .label
+{
+	float:			left;
+	width:			45%;
+	padding-left:	7px;
+}
+
+.maingamestatus .coverage .value
+{
+	float:			right;
+	width:			45%;
+	text-align:		right;
+}
+
+.maingamestatus .percent
+{
+	float:			right;
+	width:			100%;
+	text-align:		right; 
+}
+
+.mainleaderboards .topuser
+{
+	float:			left;
+	width:			100%;
+	padding-top:	2px;
+	padding-bottom:	2px;
+}
+
+.mainleaderboards .title
+{
+	float:			left;
+	width:			100%;
+
+	font-size:		15px;
+	padding-bottom: 5px;
+}
+
+.mainleaderboards .topuser .label
+{
+	float:			left;
+	width:			45%;
+	padding-left:	7px;
+}
+
+.mainleaderboards .topuser .value
+{
+	float:			right;
+	width:			45%;
+	text-align:		right;
+}
+
+.gamebox
+{
+	position:		absolute;
+	float:			left;
+	width:			900px;
+	left:			25px;
+	top:			125px;	
+}

@@ -8,7 +8,7 @@ if @result.class != Symbol
 			xml.zone( "x" => @result.x, "y" => @result.y, "id" => @result.user_id, "user" => @result.user.name )
 		else
 			xml.zone( "x" => @result.x, 					"y" => @result.y,
-					  "id" => @result.user_id, 				"user" => @result.user.name,
+					  "id" => @result.id, 					"user" => @result.user.name,
 					  "soldiers" => @result.soldiers, 		"bunker" => @result.bunker,
 					  "artillery" => @result.artillery, 	"jamming" => @result.jamming )
 		end
@@ -30,7 +30,7 @@ else
 		eText = "Database error"
 	end
 
-	xml.status( "code" => eCode ) do
+	xml.status( "code" => eCode, "controller_called" => "get_single_zone_info" ) do
 		xml.error( eText )
 	end
 

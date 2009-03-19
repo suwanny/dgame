@@ -91,9 +91,21 @@ class UserZone
 			results 				= GameRules.game_attack_formula( azones, azones_sup, dzone, dzones_sup )
 			aLoss					= results[:aloss]
 			dLoss					= results[:dloss]
-			auser.total_soldiers 	-= aLoss
-			duser.total_soldiers  	-= dLoss
+
+			RAILS_DEFAULT_LOGGER.debug "aLoss = " + aLoss.to_s
+			RAILS_DEFAULT_LOGGER.debug "dLoss = " + dLoss.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Total Soldiers Attacker = " + auser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Total Soldiers Defender = " + duser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Total Zones Attacker = " + auser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Total Zones Defender = " + duser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Score Attacker = " + auser.score.to_s
+			RAILS_DEFAULT_LOGGER.debug "Prev Score Defender = " + duser.score.to_s
+
+			auser.total_soldiers 	= auser.total_soldiers - aLoss
+			duser.total_soldiers  	= duser.total_soldiers - dLoss
             auser.spend_turns( turncost )
+
+			RAILS_DEFAULT_LOGGER.debug "this is a test"
 
 			alteredzones			= []		# Get a list of all the zones that were altered in some manner.
 			alteredzones << dzone
@@ -103,40 +115,27 @@ class UserZone
 
 			if results[:result] == true
 
+				RAILS_DEFAULT_LOGGER.debug "ATTACK VICTORY"
+
 				# Transfer the zone to the attacker.
 				# ----------------------------------
 
-				dzone.user_id      	= auser.id			# Transfer this to the attacker.
-				dzone.soldiers		= 1					# Move one soldier into the acquired zone.
-				auser.total_zones 	+= 1				# Add one zone to the attacking user
-                duser.total_zones 	-= 1				# Subtract one zone from the defender.
+				dzone.user_id      	= auser.id						# Transfer this to the attacker.
+				dzone.soldiers		= 1								# Move one soldier into the acquired zone.
+				auser.total_zones 	= auser.total_zones + 1			# Add one zone to the attacking user
+                duser.total_zones 	= duser.total_zones - 1			# Subtract one zone from the defender.
+				auser.score			= auser.score + dzone.score
+				duser.score			= duser.score - dzone.score
 
-
-                # to be compatible with the old database (a lot of nil fields)
-                dzone.score = 0 if dzone.score == nil
-
-                # to be compatible with the old database (a lot of nil fields)
-                if auser.score
-                    auser.score			+= dzone.score
-                else
-                    auser.score = dzone.score
-                end
-
-                if duser.score
-                    duser.score			-= dzone.score
-                else
-                    duser.score = 0
-                end
-
-				dzone.bunker 		= false				# Always kill the bunker.
+				dzone.bunker 		= false							# Always kill the bunker.
 
 				if dzone.artillery == true && results[:dartillery] == false
-					dzone.artillery = false            	# Sometimes take the artillery
+					dzone.artillery = false            				# Sometimes take the artillery
 				end
 
 				if dzone.jamming
-					auser.jammingcount	+= 1        	# Always take the jamming tower.
-					duser.jammingcount 	-= 1
+					auser.jammingcount	= auser.jammingcount + 1	# Always take the jamming tower.
+					duser.jammingcount 	= duser.jammingcount - 1
 				end
 
 				# Remove aLoss + 1 soldiers from the attacking zones, azones.
@@ -144,13 +143,15 @@ class UserZone
 				# -----------------------------------------------------------
 
                 # Xin: possible to have endless loops, should check the validity of rVal
-				aRemove			= aLoss + 1
+				aRemove	= aLoss + 1
 				while aRemove > 0
 					for a in azones do
-						rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
-                        rVal = 1 if rVal <= 0        # added by Xin
-						aRemove 	-= rVal
-						a.soldiers 	-= rVal
+						if aRemove > 0
+							rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
+                        	rVal 		= 1 if rVal <= 0        # added by Xin
+							aRemove 	= aRemove - rVal
+							a.soldiers 	= a.soldiers - rVal
+						end
 					end
 				end
 
@@ -192,6 +193,8 @@ class UserZone
 
 			else
 
+				RAILS_DEFAULT_LOGGER.debug "ATTACK FAILED"
+
 				# Remove units from the attacker's attacking zones.
 				# -------------------------------------------------
                 # Xin: possible to have endless loops, should check the validity of rVal
@@ -199,10 +202,12 @@ class UserZone
 				aRemove	= aLoss
 				while aRemove > 0
 					for a in azones do
-						rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
-                        rVal = 1 if rVal <= 0        # added by Xin
-						aRemove 	-= rVal
-						a.soldiers 	-= rVal
+						if aRemove > 0
+							rVal 		= [ aRemove, ( aLoss/3 ).floor, a.soldiers-1 ].min
+                        	rVal = 1 if rVal <= 0        # added by Xin
+							aRemove 	-= rVal
+							a.soldiers 	-= rVal
+						end
 					end
 				end
 
@@ -212,32 +217,96 @@ class UserZone
 				dzone.soldiers -= dLoss
 			end
 
+			RAILS_DEFAULT_LOGGER.debug "After Total Soldiers Attacker = " + auser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "After Total Soldiers Defender = " + duser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "After Total Zones Attacker = " + auser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "After Total Zones Defender = " + duser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "After Score Attacker = " + auser.score.to_s
+			RAILS_DEFAULT_LOGGER.debug "After Score Defender = " + duser.score.to_s
+                                   	 
 			begin
-				User.transaction do
+				Zone.transaction do
+
+					tstamp = "\"" + Time.now.strftime( "%Y-%m-%d %H:%M:%S" ) + "\""
 
 					for z in azones do
-						z.save()
+						RAILS_DEFAULT_LOGGER.debug "========= Save an attacking zone"
+						rawsql = 'UPDATE zones SET soldiers = ' + z.soldiers.to_s +
+											    #', update_at = ' + tstamp + 
+												' WHERE id = ' + z.id.to_s
+						RAILS_DEFAULT_LOGGER.debug "Do: " + rawsql
+						ActiveRecord::Base.connection.execute( rawsql )
+						#z.save! # Good lord, this doesn't work. Raw SQL is the only hope.
+						RAILS_DEFAULT_LOGGER.debug "========= Done"
 					end
 
 					if results[:result]
-						for z in dzones
-							if z.x == dzone.x || z.y == dzone.y
-								z.save()
+						for b in dzones
+							if ( b.x == dzone.x && b.y != dzone.y ) || ( b.x != dzone.x && b.y == dzone.y ) # XOR
+								RAILS_DEFAULT_LOGGER.debug "========= Save a defending zone"
+								rawsql = 'UPDATE zones SET soldiers = ' + b.soldiers.to_s +
+														#', update_at = ' + tstamp +
+														', user_id = ' + b.user_id.to_s +
+										 				', jamming = ' + ( b.jamming ? 1 : 0 ).to_s +
+														', bunker = ' + ( b.bunker ? 1 : 0 .to_s) +
+														', artillery = ' + ( b.artillery ? 1 : 0 ).to_s +
+														' WHERE id = ' + b.id.to_s
+								ActiveRecord::Base.connection.execute( rawsql )
+								#b.save!
+								RAILS_DEFAULT_LOGGER.debug "========= Done"
 							end
 						end
-					else
-						dzone.save()
 					end
-					
-					auser.save()
-					duser.save()
+
+					RAILS_DEFAULT_LOGGER.debug "========= Save dzone"
+					rawsql = 'UPDATE zones SET soldiers = ' + dzone.soldiers.to_s +
+													#', update_at = ' + tstamp +
+													', user_id = ' + dzone.user_id.to_s +
+													', jamming = ' + ( dzone.jamming ? 1 : 0 ).to_s +
+													', bunker = ' + ( dzone.bunker ? 1 : 0 ).to_s +
+													', artillery = ' + ( dzone.artillery ? 1 : 0 ).to_s +
+													' WHERE id = ' + dzone.id.to_s
+					ActiveRecord::Base.connection.execute( rawsql )
+					#dzone.save!
+					RAILS_DEFAULT_LOGGER.debug "========= Done"
+
+					RAILS_DEFAULT_LOGGER.debug "========= Save attacking user"
+					#auser.save!
+					rawsql = 'UPDATE users SET total_soldiers = ' + auser.total_soldiers.to_s +
+											  ', total_zones = '    + auser.total_zones.to_s +
+											  ', score = '          + auser.score.to_s +
+ 											   ' WHERE id = ' + auser.id.to_s
+					ActiveRecord::Base.connection.execute( rawsql )
+					RAILS_DEFAULT_LOGGER.debug "========= Done"
+
+
+
+
+					RAILS_DEFAULT_LOGGER.debug "========= Save defending user"
+					rawsql = 'UPDATE users SET total_soldiers = ' + duser.total_soldiers.to_s +
+											  ', total_zones = '    + duser.total_zones.to_s +
+											  ', score = '          + duser.score.to_s +
+ 											   ' WHERE id = ' + duser.id.to_s
+					ActiveRecord::Base.connection.execute( rawsql )
+					#duser.save!
+					RAILS_DEFAULT_LOGGER.debug "========= Done"
 				end
-			rescue
+
+				RAILS_DEFAULT_LOGGER.debug "Transaction complete?"
+			rescue ActiveRecord::RecordInvalid => invalid
+				RAILS_DEFAULT_LOGGER.debug "SOME SORT OF DATABASE ERROR LAWL"
 				return :database_or_constraint_error
 			end
 
 			# Return a successful (no exceptions) attack.
 			# -------------------------------------------
+
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Total Soldiers Attacker = " + auser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Total Soldiers Defender = " + duser.total_soldiers.to_s
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Total Zones Attacker = " + auser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Total Zones Defender = " + duser.total_zones.to_s
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Score Attacker = " + auser.score.to_s
+			RAILS_DEFAULT_LOGGER.debug "Post Transaction Score Defender = " + duser.score.to_s
 
 			return { :result => results[:result], :time => Time.now, :czones => alteredzones,
 					 :auser => auser, :duser => duser }
@@ -286,7 +355,7 @@ class UserZone
 			for z in Zone.get_zones_by_user_in_area( user.id, targetX - 1, targetX + 1, targetY - 1, targetY + 1)
 				if z.x == targetX || z.y == targetY
 					adj_zones << z
-					break
+#					break    #commented out by Xin Mao: will cause bugs
 				end
 			end
 
@@ -308,7 +377,8 @@ class UserZone
 				end
 			end
 
-			return :not_enough_soldiers if !first_zone && !soldiermove
+            return :not_enough_soldiers if !first_zone && !soldiermove
+#			return "not_enough_soldiers_from_" + adj_zones.size().to_s+"_adjacent_zones" if !first_zone && !soldiermove
 
 			# Get how much the zone is worth. For right now this will just be 4+/-1/, later
 			# it'll be based on population density.
@@ -695,4 +765,28 @@ class UserZone
 
 		end
 
+	    ## @result		hash with :zones, :users
+		def self.get_zone_data( minX, maxX, minY, maxY )
+
+			# Grab the zones
+			# ==============
+
+			zones = Zone.find_zones_in_view_xml( minX, maxX, minY, maxY )
+
+			# For each zone, go through and get users.
+			# ========================================
+
+			users = {}
+			for z in zones
+				if users[z.user_id] == nil
+					users[z.user_id] = User.find_by_id( z.user_id )
+				end
+			end
+
+			# Return the result!
+			# ==================
+
+			return { :zones => zones, :users => users }
+
+        end
 end

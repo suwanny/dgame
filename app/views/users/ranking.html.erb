@@ -1,20 +1,35 @@
-<H1>DGame Ranking</H1>
+<div align="center">
+<H1>World Ranking</H1>
 
-<table border="0" cellspacing="2" cellpadding="3" bordercolor="#000066">
+<table border="0"><tr>
+<% i = 0
+   for rank in @user_ranking
+        if i == 0 or i == 50 %>
+<td width=40%><table border="0" cellspacing="2" cellpadding="3" bordercolor="#000066">
     <tr>
-        <td bgcolor="#a2a2f2" width="90">User name</td>
-        <td bgcolor="#a2a2f2" width="75">Zones</td>
-        <td bgcolor="#a2a2f2" width="75">Soldiers</td>
-        <td bgcolor="#a2a2f2" width="75">Soldiers/zone</td>
-        <td bgcolor="#a2a2f2" width="60">Turns</td>
+        <td class="cell_lightest" width="50">Ranking</td>
+        <td class="cell_lightest" width="90">User name</td>
+        <td class="cell_lightest" width="75">Zones</td>
+        <td class="cell_lightest" width="75">Soldiers</td>
+        <td class="cell_lightest" width="75">Soldiers/zone</td>
+        <td class="cell_lightest" width="60">Turns</td>
     </tr>
-    <% for rank in @user_ranking %>
+<% end %>
         <tr>
-            <td bgcolor="#efefff"><%= h rank.name %></td>
-            <td bgcolor="#efefff"><%= h rank.total_zones %></td>
-            <td bgcolor="#efefff"><%= h rank.total_soldiers %></td>
-            <td bgcolor="#efefff"><%= h ("%.03f" % (rank.avg_soldiers_per_zone)).to_f %></td>
-            <td bgcolor="#efefff"><%= h rank.turns %></td>
+            <td class="cell_midcolor" align="center"><%= i+1 %></td>
+            <td class="cell_darkest"><%= h rank.name %></td>
+            <td class="cell_darkest"><%= h rank.total_zones %></td>
+            <td class="cell_darkest"><%= h rank.total_soldiers %></td>
+            <td class="cell_darkest"><%= h ("%.03f" % (rank.avg_soldiers_per_zone)).to_f %></td>
+            <td class="cell_darkest"><%= h rank.turns %></td>
         </tr>
-    <% end %>
-</table>
+<%  if i == 49 or i == 99%>
+   </table></td>
+<%  end 
+    i=i+1
+    if i >= 100
+        break
+    end
+   end %>
+</tr></table>
+</div>

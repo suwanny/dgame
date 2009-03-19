@@ -22,33 +22,18 @@
    tableh = (@y_max - @y_min + 1)* (@grid_w + 1) + 1 + 20
 %>
 
-<div style="position:relative;width:<%= (@x_max-@x_min+1)*@grid_w %>px; height:<%= tableh %>px;">
+<table width=<%= (@x_max-@x_min+1)*@grid_w %>><tr><td align="center">
+    <%= link_to image_tag("/images/view_up.gif", :border => 0, :width => 72, :height => 16),
+                    :controller => 'game', :action => 'viewport_change', :offsetX => 0, :offsetY => (@x_min - @x_max) / 2 %>
+</td></tr><tr height = "8"></tr></table>
+
+<div style="position:relative;width:<%= (@x_max-@x_min+1)*@grid_w %>px; height:<%= tableh + 20%>px;">
+
+    <!---start of the basick panel --->
+    <div style="position:absolute; top:0px; left:20px ">
 
     <!--- background grid --->
-
-    <table cellpadding="0" cellspacing="0" border="0" width="<%= tablew %>">
-        <tr height="1" bgcolor="#aaaaaa">
-            <td colspan="<%= (@x_max - @x_min + 1)*2 + 1 %>"></td>
-        </tr>
-        <% for y in (@y_min..@y_max) %>
-            <tr height="<%= @grid_w %>">
-                <td width="1" bgcolor="#aaaaaa"></td>
-                <% for x in (@x_min..@x_max)
-                %>
-                    <td width="<%= @grid_w %>">
-                    <% if @user and @user.total_zones == 0 #user has no zone%>
-                    <%= link_to image_tag("/images/spacer.gif", :border => 0, :width => @grid_w - 1, :height => @grid_w - 1),
-                        :controller => 'game', :action => 'expand_into_zone', :targetX => x, :targetY => y %>
-                    <% end%>
-                    </td>
-                    <td width="1" bgcolor="#aaaaaa"></td>
-                <% end #for x   %>
-            </tr>
-            <tr height="1" bgcolor="#aaaaaa">
-                <td colspan="<%= (@x_max - @x_min + 1)*2 + 1 %>"></td>
-            </tr>
-        <% end #for y   %>
-    </table>
+    <%=@basicGridStr %>
 
     <!--- expandable zones --->
     <%
@@ -73,16 +58,27 @@
     <%
        if @existing_zones
            for zone in @existing_zones
+                zonew = @grid_w
+                zoneh = @grid_w
+                if @aux_grids[zone.y - @y_min] and @aux_grids[zone.y - @y_min][zone.x - @x_min]
+                   if @aux_grids[zone.y - @y_min][zone.x - @x_min] % 4 == 2   #top position
+                       zoneh = @grid_w + 1
+                   end
+                   if @aux_grids[zone.y - @y_min][zone.x - @x_min] >=4   #left position
+                       zonew = @grid_w + 1
+                   end
+               end
+
+=begin    #very low efficiency here
                downzone = @existing_zones.detect {|dzone| dzone.x == zone.x and dzone.y == zone.y+1 and dzone.user_id == zone.user_id}
-               zoneh = @grid_w
                if downzone != nil
-                   zoneh += 1
+                   zoneh = @grid_w + 1
                end
                rightzone = @existing_zones.detect {|rzone| rzone.x == zone.x+1 and rzone.y == zone.y and rzone.user_id == zone.user_id}
-               zonew = @grid_w
                if rightzone != nil
-                   zonew += 1
+                   zonew = @grid_w + 1
                end
+=end
 
                xpos = (zone.x - @x_min) * (@grid_w + 1) + 1
                ypos = (zone.y - @y_min) * (@grid_w + 1) + 1
@@ -120,9 +116,25 @@
            end
            end
         %>
+        
+        <!---viewport flag--->
+        <%
+           if @user
+               xpos = (@user.viewport_x.to_i - @x_min) * (@grid_w + 1) + 1
+               ypos = (@user.viewport_y.to_i - @y_min) * (@grid_w + 1) + 1
+        %>
+        <div style="position:absolute; z-index:2;
+                    top:<%= ypos %>px; left:<%= xpos %>px; width:<%= @grid_w %>px; height:<%= @grid_w %>px;">
+        <img src="/images/flag.gif" width="<%= @grid_w %>" height="<%= @grid_w %>">
+        </div>
+        <!---end of viewport flag--->
+
+    </div>  <!---end of the main panel--->
+
+
 
     <!--- other users list in this area --->
-    <div style="position:absolute; top:15px; left:<%=tablew + 20%>px; width:200px; height:500px; ">
+    <div style="position:absolute; top:15px; left:<%=tablew + 40%>px; width:200px; height:500px; ">
     <table cellpadding="0" cellspacing="0" border="0">
         <% for other_user in @users_in_area
             if other_user.id != @user.id %>
@@ -170,21 +182,45 @@
     </table>
     </div>
 
-    <!---viewport flag--->
-    <%
-       if @user
-           xpos = (@user.viewport_x.to_i - @x_min) * (@grid_w + 1) + 1
-           ypos = (@user.viewport_y.to_i - @y_min) * (@grid_w + 1) + 1
-    %>
+    <!---right button--->
+    <% xpos = tablew + 20
+       ypos = tableh / 2 - 36 %>
     <div style="position:absolute; z-index:2;
-                top:<%= ypos %>px; left:<%= xpos %>px; width:<%= @grid_w %>px; height:<%= @grid_w %>px;">
-    <img src="/images/flag.gif" width="<%= @grid_w %>" height="<%= @grid_w %>">
+                top:<%= ypos %>px; left:<%= xpos %>px; width:16px; height:72px;">
+    <table height=72 width=16>
+        <tr>
+            <td>
+               <%= link_to image_tag("/images/view_right.gif", :border => 0, :height => 72, :width => 16),
+                        :controller => 'game', :action => 'viewport_change', :offsetY => 0, :offsetX => (@x_max - @x_min) / 2 %>
+            </td>
+        </tr>
+    </table>
     </div>
+    <!---left button--->
+    <% xpos = 0
+       ypos = tableh / 2 - 36 %>
+    <div style="position:absolute; z-index:2;
+                top:<%= ypos %>px; left:<%= xpos %>px; width:16px; height:72px;">
+    <table height=72 width=16>
+        <tr>
+            <td>
+               <%= link_to image_tag("/images/view_left.gif", :border => 0, :height => 72, :width => 16),
+                        :controller => 'game', :action => 'viewport_change', :offsetY => 0, :offsetX => (@x_min - @x_max) / 2 %>
+            </td>
+        </tr>
+    </table>
+    </div>
+
     <% end %>
 </div>
-
+<table width=<%= (@x_max-@x_min+1)*@grid_w %>><tr><td align="center">
+    <%= link_to image_tag("/images/view_down.gif", :border => 0, :width => 72, :height => 16),
+                    :controller => 'game', :action => 'viewport_change', :offsetX => 0, :offsetY => (@x_max - @x_min) / 2 %>
+</td></tr><tr height = "8"></tr></table>
 <br>
-<% if @user%>
+
+
+<% if false%>
 <%= button_to "Train Soldier",
     {:controller => "game", :action => "train_soldiers",
      :targetX => @user.viewport_x.to_i, :targetY => @user.viewport_y.to_i} %>

@@ -13,7 +13,8 @@ if @result.class == Hash
 
 		auser = @result[:user]
 
-		xml.userinfo( "name" 			=> auser.name, 				"score" 		=> auser.score,
+		xml.userinfo( "id"				=> auser.id,                "jammingcount"	=> auser.jammingcount,
+					  "name" 			=> auser.name, 				"score" 		=> auser.score,
 					  "info" 			=> auser.public_info,		"email"			=> auser.email,
 					  "color_r"			=> auser.color_r,			"color_g"   	=> auser.color_g,
 				      "color_b"			=> auser.color_b,			"turns"			=> auser.turns,
@@ -49,7 +50,7 @@ else
 		eText = "Zone is not owned by user."
 	end
 
-	xml.status( "code" => eCode ) do
+	xml.status( "code" => eCode, "controller_called" => "train_soldiers" ) do
 		xml.error( eText )
 	end
 

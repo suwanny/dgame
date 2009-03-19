@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090302013857) do
+ActiveRecord::Schema.define(:version => 20090318001537) do
 
   create_table "events", :force => true do |t|
     t.integer  "user_id"
@@ -59,6 +59,8 @@ ActiveRecord::Schema.define(:version => 20090302013857) do
     t.integer  "color_g"
     t.integer  "color_b"
     t.integer  "jammingcount"
+    t.string   "p2pid"
+    t.datetime "p2pid_timestamp"
   end
 
   create_table "zones", :force => true do |t|
@@ -73,5 +75,8 @@ ActiveRecord::Schema.define(:version => 20090302013857) do
     t.boolean  "bunker"
     t.integer  "score"
   end
+
+  add_index "zones", ["user_id"], :name => "index_zones_on_user_id"
+  add_index "zones", ["x", "y"], :name => "index_zones_on_x_and_y", :unique => true
 
 end

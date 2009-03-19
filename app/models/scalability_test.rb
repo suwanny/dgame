@@ -80,7 +80,7 @@ class ScalabilityTest
             return false
         end
 
-        newest_zone = Zone.find( :first, :conditions => {:user_id => user_id}, :order => "updated_at DESC")
+        newest_zone = Zone.find( :first, :conditions => {:user_id => user_id}, :order => "updated_at DESC, created_at DESC")
         if newest_zone == nil
             return false
         end

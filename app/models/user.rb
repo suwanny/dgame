@@ -11,24 +11,28 @@ class User < ActiveRecord::Base
 
     validates_presence_of       :name
     validates_presence_of       :total_soldiers
+	validates_presence_of       :total_zones
     validates_presence_of       :turns
-#	validates_presence_of		:color_r
-#	validates_presence_of		:color_g
-#	validates_presence_of		:color_b
-#	validates_presence_of		:jammingcount
+	validates_presence_of		:color_r
+	validates_presence_of		:color_g
+	validates_presence_of		:color_b
+	validates_presence_of		:jammingcount
+	validates_presence_of		:email
+	validates_presence_of		:score
     validates_uniqueness_of     :name
+	validates_numericality_of  	:score,    			:only_integer => true,  :greater_than_or_equal_to => 0
     validates_numericality_of  	:total_zones,    	:only_integer => true,  :greater_than_or_equal_to => 0
     validates_numericality_of  	:total_soldiers,  	:only_integer => true,  :greater_than_or_equal_to => 0
     validates_numericality_of  	:turns,        		:only_integer => true,  :greater_than_or_equal_to => 0
-#	validates_numericality_of  	:jammingcount, 		:only_integer => true,  :greater_than_or_equal_to => 0
-#	validates_numericality_of  	:color_r,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
-#	validates_numericality_of  	:color_g,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
-#	validates_numericality_of  	:color_b,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+	validates_numericality_of  	:jammingcount, 		:only_integer => true,  :greater_than_or_equal_to => 0
+	validates_numericality_of  	:color_r,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+	validates_numericality_of  	:color_g,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
+	validates_numericality_of  	:color_b,      		:only_integer => true,  :greater_than_or_equal_to => 0,	:less_than_or_equal_to => 255
     validates_confirmation_of   :password
     validate                    :password_non_blank
-    validate          			:total_zones_equals_zone_count
-	validate					:total_soldiers_equal_zone_soldier_total
-#	validate					:score_is_sum_of_owned_zones
+    #validate          			:total_zones_equals_zone_count
+	#validate					:total_soldiers_equal_zone_soldier_total
+	#validate					:score_is_sum_of_owned_zones
 
     # Functions
     # =========
@@ -44,7 +48,15 @@ class User < ActiveRecord::Base
             end
         end
         user
-    end
+	end
+
+	def self.get_top_five_users 
+		return self.find( :all, :order => "score DESC", :limit => 5, :select => "name, score" )
+	end
+
+	def self.get_user_count
+		return self.count
+	end
 
     def password
         @password
@@ -236,6 +248,21 @@ class User < ActiveRecord::Base
         end
     end
 =end
+
+    # do not want the save to always fail, should check the values
+    def save_wrapup
+        self.score = 0 if self.score == nil
+        self.total_zones = 0 if self.total_zones == nil
+        self.total_soldiers = 0 if self.total_soldiers == nil
+        self.turns = 0 if self.turns == nil
+        self.jammingcount = 0 if self.jammingcount == nil
+        self.color_r = 0 if self.color_r == nil
+        self.color_g = 0 if self.color_g == nil
+        self.color_b = 0 if self.color_b == nil
+        self.email = "unknown" if self.email == nil
+        return self.save
+    end
+
     private
 
     def password_non_blank
@@ -250,7 +277,7 @@ class User < ActiveRecord::Base
         actual_zones_count = Zone.get_total_zones_for_user( id )
         if actual_zones_count != total_zones
             self.total_zones = actual_zones_count
-            #errors.add( :total_zones, "not matching the Zones database")
+            errors.add( :total_zones, "not matching the Zones database")
         end
 	end
 
@@ -259,7 +286,7 @@ class User < ActiveRecord::Base
 
 		if totalSoldiers != self.total_soldiers
             self.total_soldiers = totalSoldiers
-        	#errors.add( :total_soldiers, "Soldier count for user doesn't match soldiers in zones!")
+        	errors.add( :total_soldiers, "Soldier count for user doesn't match soldiers in zones!")
 		end
 	end
 
@@ -268,7 +295,7 @@ class User < ActiveRecord::Base
 
 		if totalScores != self.score
             self.score = totalScores
-#			errors.add( :score, "Score is not a summation of all the zones' scores" )
+			errors.add( :score, "Score is not a summation of all the zones' scores" )
 		end
 	end
 
@@ -276,5 +303,4 @@ class User < ActiveRecord::Base
         string_to_hash = password + "wibble" + salt
         Digest::SHA1.hexdigest(string_to_hash)
 	end
-
 end

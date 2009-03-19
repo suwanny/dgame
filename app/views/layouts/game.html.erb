@@ -2,38 +2,86 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>Contested Earth</title>
+	<title>Contested Earth</title>
+	<link rel="StyleSheet" type="text/css" href="stylesheets/reset.css" />	<!-- Reset CSS file. -->
+	<script type="text/javascript" src="javascripts/bdetect.js"></script> 	<!-- Browser detection from http://www.quirksmode.org/js/detect.html -->
+	<script type="text/javascript" src="javascripts/common.js"></script> 	<!-- Does the browser detection. -->
 </head>
 <body>
 
-<div id="banner">
-  <table width=95% height=50>
-    <tr>
-      <td width=50% align=center>
+	<div class="everything">
 
-        <span style="font-size: x-large; ">DGame (Distributed Game) </span><br>
-        <br>
-        <span style="font-size: medium; ">CS290F Project   </span>
+		<span class="celogobox">
+			<% link_to( :action => "index", :controller => "main" ) do %>
+				<img src="images/celogo.png">
+			<% end %>
+		</span>
 
-      </td>
-      <td align=right>
-        <% if session[:user_id] %>
-          <%= link_to 'Game',    :controller => 'users', :action => "game"  %>
-          <%= link_to 'StatesWar',    :controller => 'stateswar', :action => "index"  %>
-          <%= link_to 'Gameboard',    :controller => 'zones' %>
-          <%= link_to 'Ranking',    :controller => 'users', :action => "ranking" %>
-          <%= link_to 'Profile',    :controller => 'users', :action => "info" %>
-          <%= link_to "LogOut", :controller => 'users', :action => "logout" %>
-        <% else %>
-          <%= link_to "LogIn", :controller => 'users', :action => "index" %>
-        <% end %>
-        <p style="color: RED"><%= flash[:notice] %></p>
-      </td>
-    </tr>
-  </table>
 
-</div>
+		<% if @user != nil %>
+			<span class="userinfobox">
 
-    <%= yield %>
+				<span class="statusbox">
+					<span class="statustitle">
+						<span class="namebox">
+							<%= @user.name %>
+						</span>
+						<span class="logoutbox">
+							<span class="logout"><%= link_to "[Logout]", :action => "logout" %></span>
+						</span>
+					</span>
+					<span class="statsbox">
+						<span class="labels">
+							<p>Score</p>
+							<p>Turns</p>
+						</span>
+						<span class="values">
+							<p><span class="score"><%= @user.score %></span></p>
+							<p><span class="turns"><%= @user.turns %></span></p>
+						</span>
+					</span>
+				</span>
+
+				<span class="linksbox">
+					<span class="gamelink">
+						<%= link_to "Game", :action => "index", :controller => "game" %>
+					</span>
+					<span class="profilelink">
+						<%= link_to "Profile", :action => "profile", :controller => "game" %>
+					</span>
+					<span class="rankinglink">
+						<%= link_to "Ranking", :action => "ranking", :controller => "game" %>
+					</span>
+					<span class="messageslink">
+						<%= link_to "Messages", :action => "inbox", :controller => "game" %>
+					</span>
+				</span>
+				
+			</span>
+
+
+
+		<% else %>
+			<span class="loginbox">
+				<span class="lboxtitle" >
+					Login or <%= link_to "Join the battle!", :action => "new" %><br />
+				</span>
+				<% form_tag( :action => "login" ) do %>
+					<span class="labelbox">
+						<p><label for="name">Username:</label></p>
+						<p><label for="password">Password:</label></p>
+					</span>
+					<span class="inputbox">
+						<p><%= text_field_tag :name, params[:name] %></p>
+						<p><%= password_field_tag :password, params[:password] %></p>
+						<p><%= submit_tag "Login" %></p>
+					</span>
+				<% end %>
+			</span>
+		<% end %>
+
+		<%= yield %>
+
+	</div>
 </body>
 </html>

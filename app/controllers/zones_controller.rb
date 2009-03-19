@@ -43,11 +43,18 @@ class ZonesController < ApplicationController
         end
 
         @existing_zones = Zone.find_zones_in_view_xml(@x_min, @x_max, @y_min, @y_max)
+        @aux_grids = Zone.getNeighborGrid(@x_min, @x_max, @y_min, @y_max, @existing_zones)
+
+        # the optimization of adjacent zone effect ends here
+
         if @user != nil
             @expandable_zones = Zone.get_expandable_zones_in_view(@user.id, @x_min, @x_max, @y_min, @y_max)
             @attackable_zones = Zone.get_attackable_zones_in_view(@user.id, @x_min, @x_max, @y_min, @y_max)
         end
         @users_in_area = Zone.find_users_in_area(@existing_zones)
+        @tableh = (@y_max - @y_min + 1)* (@grid_w + 1) + 1 + 20
+
+        @basicGridStr = Zone.GetBackgroundGridHTMLStr(@x_min, @x_max, @y_min, @y_max, @user, @grid_w)
 #    @zones = Zone.find(:all)
 
         respond_to do |format|

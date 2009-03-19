@@ -34,7 +34,7 @@ else
 		eText = "Database error"
 	end
 
-	xml.status( "code" => eCode ) do
+	xml.status( "code" => eCode, "controller_called" => "get_costs_at_location" ) do
 		xml.error( eText )
 	end
 
