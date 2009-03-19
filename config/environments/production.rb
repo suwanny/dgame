@@ -15,7 +15,7 @@ config.action_controller.consider_all_requests_local = false
 config.action_controller.perform_caching             = true
 
 # Use a different cache store in production
-config.cache_store = :mem_cache_store, '174.129.232.37:11211'
+config.cache_store = :mem_cache_store, '10.254.171.192:11211'
 
 # Enable serving of images, stylesheets, and javascripts from an asset server
 # config.action_controller.asset_host                  = "http://assets.example.com"
@@ -23,7 +23,7 @@ config.cache_store = :mem_cache_store, '174.129.232.37:11211'
 # Disable delivery errors, bad email addresses will be ignored
 # config.action_mailer.raise_delivery_errors = false
 
-# 174.129.232.37:11211, 174.129.230.52:11211
+# 10.254.171.192:11211, 174.129.230.52:11211
 # 
 # memcached 
 memcache_options = {
@@ -36,4 +36,4 @@ memcache_options = {
 }
 
 CACHE = MemCache.new memcache_options
-CACHE.servers = '174.129.232.37:11211'
+CACHE.servers = '10.254.171.192:11211'
